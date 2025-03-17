@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.fooddelivery"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.fooddelivery"
@@ -13,7 +13,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -33,9 +32,27 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14" // Совместимо с Kotlin 1.9.24 (проверьте актуальность)
+    }
 }
 
 dependencies {
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.material3)
+    implementation(libs.androidx.core.ktx.v1120)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.coil.compose)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
