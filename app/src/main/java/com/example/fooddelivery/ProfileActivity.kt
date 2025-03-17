@@ -20,82 +20,53 @@ class ProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FoodDeliveryTheme {
-                ProfileScreen()
+                PaymentScreen()
             }
         }
     }
 }
 
 @Composable
-fun ProfileScreen() {
+fun PaymentScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Top Bar
-        Box(
+        // Верхнее поле с возвратом
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFFFEB3B))
-                .padding(16.dp)
+                .wrapContentHeight(),
+            color = Color.Yellow
         ) {
-            IconButton(
-                onClick = { /* Возврат к MainActivity */ },
-                modifier = Modifier.align(Alignment.CenterStart)
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
-                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Оплата", style = MaterialTheme.typography.headlineSmall)
             }
-            Text(
-                text = "Профиль",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.align(Alignment.Center)
-            )
         }
 
-        // Profile Content
+        // Контент оплаты
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Личный кабинет", style = MaterialTheme.typography.headlineMedium)
+            Text("Выберите способ оплаты", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                label = { Text("Имя") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("Способы оплаты", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = { /* Добавить карту */ }) {
-                    Text("Добавить карту")
-                }
-                Button(onClick = { /* Наличные */ }) {
-                    Text("Наличные")
-                }
+                Button(onClick = { /* Логика для карты */ }) { Text("Карта") }
+                Button(onClick = { /* Логика для наличных */ }) { Text("Наличные") }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -104,13 +75,14 @@ fun ProfileScreen() {
                 label = { Text("Адрес доставки") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* Сохранить изменения */ },
+                onClick = { /* Подтверждение оплаты */ },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Сохранить")
+                Text("Подтвердить заказ")
             }
         }
     }
