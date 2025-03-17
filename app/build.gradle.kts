@@ -36,7 +36,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14" // Совместимо с Kotlin 1.9.24 (проверьте актуальность)
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 }
 
