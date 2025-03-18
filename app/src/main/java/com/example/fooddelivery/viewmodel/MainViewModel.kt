@@ -16,18 +16,31 @@ class MainViewModel(private val api: FoodApi) : ViewModel() {
     val recommendedProducts: StateFlow<List<Product>> = _recommendedProducts
 
     init {
-        loadHomeData()
+        loadProducts()
     }
 
-    private fun loadHomeData() {
+    private fun loadProducts() {
         viewModelScope.launch {
             try {
                 val products = api.getProducts()
-                _newProducts.value = products.take(5) // Например, первые 5 как новинки
-                _recommendedProducts.value = products.drop(5).take(5) // Следующие 5 как рекомендации
+                _newProducts.value = products.take(5) // Первые 5 как новинки
+                _recommendedProducts.value = products.drop(5) // Остальные как рекомендации
             } catch (e: Exception) {
                 // Обработка ошибок
             }
+        }
+    }
+
+    fun toggleFavorite(product: Product) {
+        viewModelScope.launch {
+            val updatedNewProducts = _newProducts.value.map {
+                if (it.id == product.id) it.copy(isFavorite = !it.isFavorite) else it
+            }
+            val updatedRecommendedProducts = _recommendedProducts.value.map {
+                if (it.id == product.id) it.copy(isFavorite = !it.isFavorite) else it
+            }
+            _newProducts.value = updatedNewProducts
+            _recommendedProducts.value = updatedRecommendedProducts
         }
     }
 }

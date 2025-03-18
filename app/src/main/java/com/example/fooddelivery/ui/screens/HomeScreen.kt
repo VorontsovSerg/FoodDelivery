@@ -3,6 +3,7 @@ package com.example.fooddelivery.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -10,15 +11,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.MainViewModel
 
 @Composable
-fun HomeScreen(viewModel: MainViewModel) {
-    val newProductsState = viewModel.newProducts.collectAsState()
-    val recommendedProductsState = viewModel.recommendedProducts.collectAsState()
-    val newProducts = newProductsState.value
-    val recommendedProducts = recommendedProductsState.value
+fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
+    val newProducts = viewModel.newProducts.collectAsState().value // Извлекаем значение через .value
+    val recommendedProducts = viewModel.recommendedProducts.collectAsState().value // Извлекаем значение через .value
 
     Column(
         modifier = Modifier
@@ -27,30 +27,34 @@ fun HomeScreen(viewModel: MainViewModel) {
             .padding(16.dp)
     ) {
         Text("Новинки", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
-            modifier = Modifier.padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.wrapContentHeight(), // Не растягиваем по высоте
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
-            items(newProducts.size) { index ->
+            items(newProducts) { product ->
                 ProductCard(
-                    product = newProducts[index],
-                    onFavoriteClick = { /* TODO */ },
-                    onClick = { /* TODO */ }
+                    product = product,
+                    onFavoriteClick = { viewModel.toggleFavorite(it) }, // Переключаем избранное через ViewModel
+                    onClick = { navController.navigate("product/${product.id}") } // Переход на ProductDetailScreen
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Рекомендации", style = MaterialTheme.typography.headlineSmall)
+        Text("Рекомендуем", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
-            modifier = Modifier.padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.wrapContentHeight(), // Не растягиваем по высоте
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
-            items(recommendedProducts.size) { index ->
+            items(recommendedProducts) { product ->
                 ProductCard(
-                    product = recommendedProducts[index],
-                    onFavoriteClick = { /* TODO */ },
-                    onClick = { /* TODO */ }
+                    product = product,
+                    onFavoriteClick = { viewModel.toggleFavorite(it) }, // Переключаем избранное через ViewModel
+                    onClick = { navController.navigate("product/${product.id}") } // Переход на ProductDetailScreen
                 )
             }
         }

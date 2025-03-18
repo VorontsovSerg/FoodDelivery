@@ -19,8 +19,7 @@ class FavoritesViewModel(private val api: FoodApi) : ViewModel() {
     private fun loadFavorites() {
         viewModelScope.launch {
             try {
-                val products = api.getProducts()
-                _favoriteProducts.value = products.filter { it.isFavorite }
+                _favoriteProducts.value = api.getProducts().filter { it.isFavorite }
             } catch (e: Exception) {
                 // Обработка ошибок
             }
@@ -29,12 +28,14 @@ class FavoritesViewModel(private val api: FoodApi) : ViewModel() {
 
     fun toggleFavorite(product: Product) {
         viewModelScope.launch {
-            val updatedList = _favoriteProducts.value.toMutableList()
-            val index = updatedList.indexOfFirst { it.id == product.id }
-            if (index != -1) {
-                updatedList[index] = updatedList[index].copy(isFavorite = !updatedList[index].isFavorite)
-                _favoriteProducts.value = updatedList.filter { it.isFavorite }
+            val updatedFavorites = _favoriteProducts.value.toMutableList()
+            val existingProduct = updatedFavorites.find { it.id == product.id }
+            if (existingProduct != null) {
+                updatedFavorites.remove(existingProduct)
+            } else {
+                updatedFavorites.add(product.copy(isFavorite = true))
             }
+            _favoriteProducts.value = updatedFavorites
         }
     }
 }

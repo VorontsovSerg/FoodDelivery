@@ -28,7 +28,7 @@ fun ProductDetailScreen(
 ) {
     var isFavorite by remember { mutableStateOf(product.isFavorite) }
     var cartCount by remember { mutableStateOf(cartViewModel.cartItems.value.find { it.product.id == product.id }?.quantity ?: 0) }
-    val images = listOfNotNull(product.imageUrl) // Может быть несколько изображений
+    val images = product.images // Используем список изображений из модели
 
     Column(
         modifier = Modifier
@@ -86,7 +86,13 @@ fun ProductDetailScreen(
         Text("Цена: ${product.price} ₽", style = MaterialTheme.typography.bodyLarge)
         Text("Категория: ${product.category}", style = MaterialTheme.typography.bodyMedium)
         Text("Подкатегория: ${product.subcategory}", style = MaterialTheme.typography.bodyMedium)
-        Text("Описание: Вкусный и свежий продукт", style = MaterialTheme.typography.bodySmall)
+        Text("Описание: ${product.description}", style = MaterialTheme.typography.bodySmall) // Используем описание из модели
+
+        // Характеристики
+        Spacer(modifier = Modifier.height(8.dp))
+        product.attributes.forEach { (key, value) ->
+            Text("$key: $value", style = MaterialTheme.typography.bodyMedium)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

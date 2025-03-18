@@ -1,5 +1,6 @@
 package com.example.fooddelivery.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.fooddelivery.data.Product
 
+@SuppressLint("PrivateResource")
 @Composable
 fun ProductCard(
     product: Product,
@@ -34,7 +36,7 @@ fun ProductCard(
 
     Box(
         modifier = Modifier
-            .width(160.dp)
+            .size(width = 160.dp, height = 200.dp) // Фиксированный размер
             .background(cardColor, MaterialTheme.shapes.large)
             .clickable { onClick() }
             .padding(8.dp)
@@ -46,17 +48,17 @@ fun ProductCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(120.dp) // Фиксированный размер изображения
                     .clip(MaterialTheme.shapes.medium)
                     .background(Color.White)
             ) {
                 AsyncImage(
-                    model = product.imageUrl,
+                    model = product.images.firstOrNull(),
                     contentDescription = product.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                    error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha), // Изображение ошибки
-                    placeholder = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha) // Пока грузится
+                    error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha),
+                    placeholder = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha)
                 )
                 IconButton(
                     onClick = { onFavoriteClick(product) },

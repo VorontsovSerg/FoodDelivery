@@ -13,7 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.fooddelivery.data.*
+import com.example.fooddelivery.data.Category
+import com.example.fooddelivery.data.FoodApi
+import com.example.fooddelivery.data.FoodData
+import com.example.fooddelivery.data.Product
 import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
 import com.example.fooddelivery.ui.screens.*
@@ -64,7 +67,7 @@ fun FoodDeliveryApp() {
             val categories by catalogViewModel.categories.collectAsState()
 
             NavHost(navController = navController, startDestination = "home") {
-                composable("home") { HomeScreen(mainViewModel) }
+                composable("home") { HomeScreen(mainViewModel, navController) } // Передаем navController
                 composable("catalog") { CatalogScreen(catalogViewModel, navController) }
                 composable("favorites") { FavoritesScreen(favoritesViewModel) }
                 composable("cart") { CartScreen(cartViewModel) }
@@ -94,34 +97,9 @@ fun FoodDeliveryApp() {
     }
 }
 
-// Моковая реализация API остается без изменений
 class FoodApiImpl : FoodApi {
-    private val products = listOf(
-        Product(1, "Яблоко", 10.0, "https://example.com/apple.jpg", "Базар", "Фрукты"),
-        Product(2, "Груша", 12.0, "https://example.com/pear.jpg", "Базар", "Фрукты"),
-        Product(3, "Банан", 15.0, "https://example.com/banana.jpg", "Базар", "Фрукты"),
-        Product(4, "Апельсин", 18.0, "https://example.com/orange.jpg", "Базар", "Фрукты"),
-        Product(5, "Киви", 20.0, "https://example.com/kiwi.jpg", "Базар", "Фрукты"),
-        Product(6, "Морковь", 8.0, "https://example.com/carrot.jpg", "Базар", "Овощи"),
-        Product(7, "Картофель", 5.0, "https://example.com/potato.jpg", "Базар", "Овощи"),
-        Product(8, "Лук", 6.0, "https://example.com/onion.jpg", "Базар", "Овощи"),
-        Product(9, "Томат", 12.0, "https://example.com/tomato.jpg", "Базар", "Овощи"),
-        Product(10, "Огурец", 10.0, null, "Базар", "Овощи")
-    )
-
-    private val categories = listOf(
-        Category(
-            "Базар",
-            listOf(
-                Subcategory("Фрукты", 0xFF4CAF50),
-                Subcategory("Овощи", 0xFF8BC34A)
-            ),
-            listOf(0xFF4CAF50, 0xFF8BC34A)
-        )
-    )
-
-    override suspend fun getProducts(): List<Product> = products
-    override suspend fun getCategories(): List<Category> = categories
+    override suspend fun getProducts(): List<Product> = FoodData.products
+    override suspend fun getCategories(): List<Category> = FoodData.categories
     override suspend fun searchProducts(query: String): List<Product> =
-        products.filter { it.name.contains(query, ignoreCase = true) }
+        FoodData.products.filter { it.name.contains(query, ignoreCase = true) }
 }
