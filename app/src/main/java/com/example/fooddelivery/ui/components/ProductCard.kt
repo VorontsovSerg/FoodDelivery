@@ -3,7 +3,6 @@ package com.example.fooddelivery.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -36,28 +35,29 @@ fun ProductCard(
     Box(
         modifier = Modifier
             .width(160.dp)
-            .padding(8.dp)
-            .background(cardColor, RoundedCornerShape(16.dp))
+            .background(cardColor, MaterialTheme.shapes.large)
             .clickable { onClick() }
+            .padding(8.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(8.dp)
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(Color.White)
             ) {
                 AsyncImage(
-                    model = product.imageUrl ?: "error_image_url",
+                    model = product.imageUrl,
                     contentDescription = product.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                    error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha)
+                    error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha), // Изображение ошибки
+                    placeholder = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha) // Пока грузится
                 )
-
                 IconButton(
                     onClick = { onFavoriteClick(product) },
                     modifier = Modifier
@@ -71,7 +71,6 @@ fun ProductCard(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
             Text(product.name, style = MaterialTheme.typography.bodyMedium)
             Text("${product.price} ₽", style = MaterialTheme.typography.bodySmall)

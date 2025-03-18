@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -40,7 +38,6 @@ fun FoodDeliveryApp() {
     var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
-    // Инициализация ViewModel с моковым API
     val api = FoodApiImpl()
     val mainViewModel = MainViewModel(api)
     val catalogViewModel = CatalogViewModel(api)
@@ -53,7 +50,6 @@ fun FoodDeliveryApp() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Верхнее поле с поиском
         SearchBar { query ->
             searchQuery = query
             scope.launch {
@@ -62,17 +58,28 @@ fun FoodDeliveryApp() {
             }
         }
 
-        // Основная область контента
         Box(modifier = Modifier.weight(1f)) {
             val newProducts by mainViewModel.newProducts.collectAsState()
             val recommendedProducts by mainViewModel.recommendedProducts.collectAsState()
+            val categories by catalogViewModel.categories.collectAsState()
 
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen(mainViewModel) }
-                composable("catalog") { CatalogScreen(catalogViewModel) }
+                composable("catalog") { CatalogScreen(catalogViewModel, navController) }
                 composable("favorites") { FavoritesScreen(favoritesViewModel) }
                 composable("cart") { CartScreen(cartViewModel) }
                 composable("search") { SearchScreen(searchViewModel, searchQuery) }
+                composable("subcategories/{categoryName}") { backStackEntry ->
+                    val categoryName = backStackEntry.arguments?.getString("categoryName")
+                    val category = categories.find { it.name == categoryName }
+                    category?.let { SubcategoryScreen(it, navController) }
+                        ?: Text("Категория не найдена")
+                }
+                composable("products/{categoryName}/{subcategoryName}") { backStackEntry ->
+                    val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                    val subcategoryName = backStackEntry.arguments?.getString("subcategoryName") ?: ""
+                    ProductsBySubcategoryScreen(catalogViewModel, categoryName, subcategoryName, navController)
+                }
                 composable("product/{productId}") { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId")?.toInt()
                     val product = newProducts.find { it.id == productId }
@@ -83,23 +90,22 @@ fun FoodDeliveryApp() {
             }
         }
 
-        // Нижняя панель навигации
         BottomNavigationBar(navController)
     }
 }
 
-// Моковая реализация API с данными
+// Моковая реализация API остается без изменений
 class FoodApiImpl : FoodApi {
     private val products = listOf(
-        Product(1, "Яблоко", 10.0, null, "Базар", "Фрукты"),
-        Product(2, "Груша", 12.0, null, "Базар", "Фрукты"),
-        Product(3, "Банан", 15.0, null, "Базар", "Фрукты"),
-        Product(4, "Апельсин", 18.0, null, "Базар", "Фрукты"),
-        Product(5, "Киви", 20.0, null, "Базар", "Фрукты"),
-        Product(6, "Морковь", 8.0, null, "Базар", "Овощи"),
-        Product(7, "Картофель", 5.0, null, "Базар", "Овощи"),
-        Product(8, "Лук", 6.0, null, "Базар", "Овощи"),
-        Product(9, "Томат", 12.0, null, "Базар", "Овощи"),
+        Product(1, "Яблоко", 10.0, "https://example.com/apple.jpg", "Базар", "Фрукты"),
+        Product(2, "Груша", 12.0, "https://example.com/pear.jpg", "Базар", "Фрукты"),
+        Product(3, "Банан", 15.0, "https://example.com/banana.jpg", "Базар", "Фрукты"),
+        Product(4, "Апельсин", 18.0, "https://example.com/orange.jpg", "Базар", "Фрукты"),
+        Product(5, "Киви", 20.0, "https://example.com/kiwi.jpg", "Базар", "Фрукты"),
+        Product(6, "Морковь", 8.0, "https://example.com/carrot.jpg", "Базар", "Овощи"),
+        Product(7, "Картофель", 5.0, "https://example.com/potato.jpg", "Базар", "Овощи"),
+        Product(8, "Лук", 6.0, "https://example.com/onion.jpg", "Базар", "Овощи"),
+        Product(9, "Томат", 12.0, "https://example.com/tomato.jpg", "Базар", "Овощи"),
         Product(10, "Огурец", 10.0, null, "Базар", "Овощи")
     )
 

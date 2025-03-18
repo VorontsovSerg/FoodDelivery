@@ -28,7 +28,7 @@ fun ProductDetailScreen(
 ) {
     var isFavorite by remember { mutableStateOf(product.isFavorite) }
     var cartCount by remember { mutableStateOf(cartViewModel.cartItems.value.find { it.product.id == product.id }?.quantity ?: 0) }
-    val images = listOfNotNull(product.imageUrl, "https://example.com/placeholder.jpg") // Пример нескольких изображений
+    val images = listOfNotNull(product.imageUrl) // Может быть несколько изображений
 
     Column(
         modifier = Modifier
@@ -54,7 +54,8 @@ fun ProductDetailScreen(
                         contentDescription = product.name,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                        error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha) // Изображение ошибки
+                        error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha),
+                        placeholder = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha)
                     )
                 }
             }
@@ -72,7 +73,7 @@ fun ProductDetailScreen(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(if (index == 0) Color.Black else Color.Gray) // Первый активный
+                        .background(if (index == 0) Color.Black else Color.Gray)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
             }
@@ -80,7 +81,7 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Название и описание
+        // Информация о товаре
         Text(product.name, style = MaterialTheme.typography.headlineMedium)
         Text("Цена: ${product.price} ₽", style = MaterialTheme.typography.bodyLarge)
         Text("Категория: ${product.category}", style = MaterialTheme.typography.bodyMedium)
