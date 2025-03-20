@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.fooddelivery.PaymentActivity
@@ -146,8 +147,8 @@ fun DashedDivider(
     Canvas(modifier = modifier) {
         val path = Path()
         val width = size.width
-        val dash = dashLength.value * density // Преобразуем Dp в Float
-        val gap = gapLength.value * density // Преобразуем Dp в Float
+        val dash = dashLength.value * density
+        val gap = gapLength.value * density
         var x = 0f
         while (x < width) {
             path.moveTo(x, size.height / 2)
