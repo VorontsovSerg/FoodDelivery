@@ -13,7 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.ui.theme.FoodDeliveryTheme
 
 class ProfileActivity : ComponentActivity() {
@@ -21,7 +23,7 @@ class ProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FoodDeliveryTheme {
-                ProfileScreen(onBack = { finish() }) // Передаем finish как параметр
+                ProfileScreen(onBack = { finish() })
             }
         }
     }
@@ -36,7 +38,8 @@ data class ProfileData(
 
 @Composable
 fun ProfileScreen(onBack: () -> Unit) {
-    var profileData by remember { mutableStateOf(ProfileData()) }
+    val context = LocalContext.current
+    var profileData by remember { mutableStateOf(Persistence.loadProfile(context) ?: ProfileData()) }
     var isEditing by remember { mutableStateOf(false) }
     var tempAvatarUrl by remember { mutableStateOf(profileData.avatarUrl ?: "") }
     var tempFullName by remember { mutableStateOf(profileData.fullName ?: "") }
@@ -49,13 +52,12 @@ fun ProfileScreen(onBack: () -> Unit) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        // Верхняя панель
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = onBack) { // Используем переданный параметр
+            IconButton(onClick = onBack) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
             Text("Профиль", style = MaterialTheme.typography.headlineSmall)
@@ -66,7 +68,6 @@ fun ProfileScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Отображение или редактирование профиля
         if (isEditing) {
             OutlinedTextField(
                 value = tempAvatarUrl,
@@ -96,6 +97,7 @@ fun ProfileScreen(onBack: () -> Unit) {
             Button(
                 onClick = {
                     profileData = ProfileData(tempAvatarUrl, tempFullName, tempCity, tempPhone)
+                    Persistence.saveProfile(context, profileData)
                     isEditing = false
                 },
                 modifier = Modifier.fillMaxWidth()

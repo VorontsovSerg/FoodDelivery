@@ -1,6 +1,5 @@
 package com.example.fooddelivery.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.fooddelivery.data.Product
 
-@SuppressLint("PrivateResource")
 @Composable
 fun ProductCard(
     product: Product,
