@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +18,7 @@ import com.example.fooddelivery.viewmodel.FavoritesViewModel
 
 @Composable
 fun FavoritesScreen(viewModel: FavoritesViewModel) {
-    val favoriteProducts = viewModel.favoriteProducts.collectAsState().value // Извлекаем значение через .value
+    val favorites = viewModel.favorites.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -28,28 +29,32 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
         Text("Избранное", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (favoriteProducts.isEmpty()) {
+        if (favorites.isEmpty()) {
             Text(
-                "Избранное пусто",
+                "Нет избранных товаров",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // 2 столбца
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(favoriteProducts.size) { index ->
-                    ProductCard(
-                        product = favoriteProducts[index],
-                        onFavoriteClick = { product ->
-                            viewModel.toggleFavorite(product) // Переключаем состояние
-                        },
-                        onClick = { /* Навигация добавляется позже, если нужно */ }
-                    )
+                items(favorites) { product ->
+                    Box(
+                        modifier = Modifier
+                            .size(width = 150.dp, height = 200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ProductCard(
+                            product = product,
+                            onFavoriteClick = { viewModel.toggleFavorite(it) },
+                            onClick = { /* Навигация не указана */ }
+                        )
+                    }
                 }
             }
         }

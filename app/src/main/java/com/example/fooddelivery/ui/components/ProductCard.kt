@@ -34,7 +34,7 @@ fun ProductCard(
 
     Box(
         modifier = Modifier
-            .size(width = 150.dp, height = 200.dp) // Уменьшенный фиксированный размер
+            .size(width = 150.dp, height = 200.dp)
             .background(cardColor, MaterialTheme.shapes.large)
             .clickable { onClick() }
             .padding(8.dp)
@@ -46,7 +46,7 @@ fun ProductCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(110.dp) // Уменьшен размер изображения под новую высоту
+                    .size(110.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .background(Color.White)
             ) {
@@ -71,7 +71,7 @@ fun ProductCard(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp)) // Уменьшен отступ
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 product.name,
                 style = MaterialTheme.typography.bodyMedium,

@@ -14,10 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.ui.components.ProductCard
+import com.example.fooddelivery.viewmodel.FavoritesViewModel
 import com.example.fooddelivery.viewmodel.MainViewModel
 
 @Composable
-fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
+fun HomeScreen(viewModel: MainViewModel, navController: NavController, favoritesViewModel: FavoritesViewModel) {
     val newProducts = viewModel.newProducts.collectAsState().value
     val recommendedProducts = viewModel.recommendedProducts.collectAsState().value
 
@@ -31,18 +32,18 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             modifier = Modifier.wrapContentHeight(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             items(newProducts) { product ->
                 Box(
                     modifier = Modifier
-                        .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                        .size(width = 150.dp, height = 200.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     ProductCard(
                         product = product,
-                        onFavoriteClick = { viewModel.toggleFavorite(it) },
+                        onFavoriteClick = { favoritesViewModel.toggleFavorite(it) },
                         onClick = { navController.navigate("product/${product.id}") }
                     )
                 }
@@ -54,18 +55,18 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             modifier = Modifier.wrapContentHeight(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             items(recommendedProducts) { product ->
                 Box(
                     modifier = Modifier
-                        .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                        .size(width = 150.dp, height = 200.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     ProductCard(
                         product = product,
-                        onFavoriteClick = { viewModel.toggleFavorite(it) },
+                        onFavoriteClick = { favoritesViewModel.toggleFavorite(it) },
                         onClick = { navController.navigate("product/${product.id}") }
                     )
                 }
