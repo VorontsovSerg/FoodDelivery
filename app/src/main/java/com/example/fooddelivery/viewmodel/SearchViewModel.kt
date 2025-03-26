@@ -12,12 +12,18 @@ class SearchViewModel(private val api: FoodApi) : ViewModel() {
     private val _searchResults = MutableStateFlow<List<Product>>(emptyList())
     val searchResults: StateFlow<List<Product>> = _searchResults
 
+    private val _searchError = MutableStateFlow<String?>(null)
+    val searchError: StateFlow<String?> = _searchError
+
     fun searchProducts(query: String) {
         viewModelScope.launch {
             try {
-                _searchResults.value = api.searchProducts(query)
+                val results = api.searchProducts(query)
+                _searchResults.value = results
+                _searchError.value = null // Очищаем ошибку при успехе
             } catch (e: Exception) {
-                // Обработка ошибок
+                _searchResults.value = emptyList()
+                _searchError.value = "Не удалось выполнить поиск: ${e.message}"
             }
         }
     }

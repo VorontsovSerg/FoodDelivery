@@ -4,20 +4,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.SearchViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, query: String) {
-    val searchResultsState = viewModel.searchResults.collectAsState()
-    val searchResults = searchResultsState.value
+    val searchResults = viewModel.searchResults.collectAsState().value
+    val searchError = viewModel.searchError.collectAsState().value
+    val scope = rememberCoroutineScope()
+    var lastQuery by remember { mutableStateOf(query) }
+
+    LaunchedEffect(query) {
+        if (query.isNotEmpty()) {
+            lastQuery = query
+            viewModel.searchProducts(query)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -25,20 +35,63 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text("Найдено товаров: ${searchResults.size}", style = MaterialTheme.typography.headlineSmall)
+        Text("Результаты поиска для \"$query\"", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 8.dp)
-        ) {
-            items(searchResults.size) { index ->
-                ProductCard(
-                    product = searchResults[index],
-                    onFavoriteClick = { /* TODO */ },
-                    onClick = { /* TODO */ }
+        when {
+            searchError != null -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Ошибка поиска: $searchError",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.searchProducts(lastQuery)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Обновить", color = Color.White)
+                    }
+                }
+            }
+            searchResults.isEmpty() && query.isNotEmpty() -> {
+                Text(
+                    "Ничего не найдено",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
+            }
+            else -> {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы по горизонтали
+                    verticalArrangement = Arrangement.spacedBy(8.dp) // Равные отступы по вертикали
+                ) {
+                    items(searchResults) { product ->
+                        Box(
+                            modifier = Modifier
+                                .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ProductCard(
+                                product = product,
+                                onFavoriteClick = { /* Не используется здесь */ },
+                                onClick = { /* Навигация не указана */ }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

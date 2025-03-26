@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -17,8 +18,8 @@ import com.example.fooddelivery.viewmodel.MainViewModel
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
-    val newProducts = viewModel.newProducts.collectAsState().value // Извлекаем значение через .value
-    val recommendedProducts = viewModel.recommendedProducts.collectAsState().value // Извлекаем значение через .value
+    val newProducts = viewModel.newProducts.collectAsState().value
+    val recommendedProducts = viewModel.recommendedProducts.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -29,16 +30,22 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Text("Новинки", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
-            modifier = Modifier.wrapContentHeight(), // Не растягиваем по высоте
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.wrapContentHeight(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             items(newProducts) { product ->
-                ProductCard(
-                    product = product,
-                    onFavoriteClick = { viewModel.toggleFavorite(it) }, // Переключаем избранное через ViewModel
-                    onClick = { navController.navigate("product/${product.id}") } // Переход на ProductDetailScreen
-                )
+                Box(
+                    modifier = Modifier
+                        .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                    contentAlignment = Alignment.Center
+                ) {
+                    ProductCard(
+                        product = product,
+                        onFavoriteClick = { viewModel.toggleFavorite(it) },
+                        onClick = { navController.navigate("product/${product.id}") }
+                    )
+                }
             }
         }
 
@@ -46,16 +53,22 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Text("Рекомендуем", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
-            modifier = Modifier.wrapContentHeight(), // Не растягиваем по высоте
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.wrapContentHeight(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             items(recommendedProducts) { product ->
-                ProductCard(
-                    product = product,
-                    onFavoriteClick = { viewModel.toggleFavorite(it) }, // Переключаем избранное через ViewModel
-                    onClick = { navController.navigate("product/${product.id}") } // Переход на ProductDetailScreen
-                )
+                Box(
+                    modifier = Modifier
+                        .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                    contentAlignment = Alignment.Center
+                ) {
+                    ProductCard(
+                        product = product,
+                        onFavoriteClick = { viewModel.toggleFavorite(it) },
+                        onClick = { navController.navigate("product/${product.id}") }
+                    )
+                }
             }
         }
     }

@@ -42,11 +42,11 @@ fun FoodDeliveryApp() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val api = FoodApiImpl(context) // Передаем context
+    val api = FoodApiImpl(context)
     val mainViewModel = MainViewModel(api)
     val catalogViewModel = CatalogViewModel(api)
     val favoritesViewModel = FavoritesViewModel(api)
-    val cartViewModel = CartViewModel(context) // Передаем context
+    val cartViewModel = CartViewModel(context)
     val searchViewModel = SearchViewModel(api)
 
     Column(
@@ -54,14 +54,16 @@ fun FoodDeliveryApp() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        SearchBar { query ->
-            searchQuery = query
-            scope.launch {
-                searchViewModel.searchProducts(query)
-                if (query.isNotEmpty()) navController.navigate("search")
+        SearchBar(
+            searchQuery = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onSearch = { query ->
+                scope.launch {
+                    searchViewModel.searchProducts(query)
+                    if (query.isNotEmpty()) navController.navigate("search")
+                }
             }
-        }
-
+        )
         Box(modifier = Modifier.weight(1f)) {
             val newProducts by mainViewModel.newProducts.collectAsState()
             val recommendedProducts by mainViewModel.recommendedProducts.collectAsState()
@@ -93,7 +95,6 @@ fun FoodDeliveryApp() {
                 }
             }
         }
-
         BottomNavigationBar(navController)
     }
 }
