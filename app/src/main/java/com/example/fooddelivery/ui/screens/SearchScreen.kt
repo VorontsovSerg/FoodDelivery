@@ -25,7 +25,6 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
     LaunchedEffect(query) {
         if (query.isNotEmpty()) {
             lastQuery = query
-            viewModel.searchProducts(query)
         }
     }
 
@@ -75,13 +74,13 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp), // Равные отступы по горизонтали
-                    verticalArrangement = Arrangement.spacedBy(8.dp) // Равные отступы по вертикали
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(searchResults) { product ->
                         Box(
                             modifier = Modifier
-                                .size(width = 150.dp, height = 200.dp), // Фиксированный размер ячейки
+                                .size(width = 150.dp, height = 200.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             ProductCard(

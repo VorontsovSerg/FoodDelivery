@@ -11,38 +11,45 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.fooddelivery.ui.theme.FoodDeliveryTheme
 
 @Composable
 fun SearchBar(
     searchQuery: String,
     onQueryChange: (String) -> Unit,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit
 ) {
+    val isFocused = remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Yellow) // Желтый фон
-            .padding(top = 32.dp, bottom = 32.dp) // Отступы сверху и снизу от фона
+            .background(Color.Yellow)
+            .padding(top = 16.dp, bottom = 16.dp)
     ) {
         TextField(
             value = searchQuery,
             onValueChange = { newValue ->
-                onQueryChange(newValue)
-                onSearch(newValue)
+                onQueryChange(newValue) // Только обновляем текст, поиск не запускается
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp) // Мелкие отступы справа и слева
+                .padding(horizontal = 8.dp)
                 .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
                 .background(Color.White)
-                .align(Alignment.Center), // Центрирование по вертикали
+                .align(Alignment.Center)
+                .onFocusChanged { focusState ->
+                    isFocused.value = focusState.isFocused
+                    onFocusChange(focusState.isFocused) // Уведомляем о фокусе
+                },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -70,7 +77,11 @@ fun SearchBar(
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
-                onSearch = { onSearch(searchQuery) }
+                onSearch = {
+                    if (searchQuery.isNotEmpty()) {
+                        onSearch(searchQuery) // Поиск только при нажатии Enter и непустой строке
+                    }
+                }
             ),
             singleLine = true,
             colors = TextFieldDefaults.colors(
