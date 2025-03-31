@@ -19,18 +19,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.fooddelivery.data.Product
+import com.example.fooddelivery.data.Subcategory
 
 @Composable
 fun ProductCard(
     product: Product,
+    subcategories: List<Subcategory>, // Добавляем список подкатегорий
     onFavoriteClick: (Product) -> Unit,
     onClick: () -> Unit
 ) {
-    val cardColor = when (product.subcategory) {
-        "Фрукты" -> Color(0xFF4CAF50)
-        "Овощи" -> Color(0xFF8BC34A)
-        else -> Color.Gray
-    }
+    val subcategory = subcategories.find { it.name == product.subcategory }
+    val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray // Используем цвет подкатегории или серый по умолчанию
 
     Box(
         modifier = Modifier

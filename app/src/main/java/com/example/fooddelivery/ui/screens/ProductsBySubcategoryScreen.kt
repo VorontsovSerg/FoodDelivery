@@ -8,12 +8,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.fooddelivery.data.FoodData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.CatalogViewModel
 
@@ -24,13 +25,8 @@ fun ProductsBySubcategoryScreen(
     subcategoryName: String,
     navController: NavController
 ) {
-    val subcategoryProductsState = viewModel.subcategoryProducts.collectAsState()
-    val subcategoryProducts = subcategoryProductsState.value
-
-    // Загружаем товары для подкатегории
-    LaunchedEffect(categoryName, subcategoryName) {
-        viewModel.loadProductsForSubcategory(categoryName, subcategoryName)
-    }
+    val products = viewModel.getProductsBySubcategory(categoryName, subcategoryName).collectAsState().value
+    val subcategories = FoodData.categories.flatMap { it.subcategories } // Получаем подкатегории из FoodData
 
     Column(
         modifier = Modifier
@@ -38,25 +34,37 @@ fun ProductsBySubcategoryScreen(
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text(
-            "Категория: $categoryName - $subcategoryName",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Text("$categoryName - $subcategoryName", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(subcategoryProducts) { product ->
-                ProductCard(
-                    product = product,
-                    onFavoriteClick = { /* Обработка избранного в будущем */ },
-                    onClick = { navController.navigate("product/${product.id}") }
-                )
+        if (products.isEmpty()) {
+            Text(
+                "Нет товаров в этой подкатегории",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(products) { product ->
+                    Box(
+                        modifier = Modifier
+                            .size(width = 150.dp, height = 200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ProductCard(
+                            product = product,
+                            subcategories = subcategories, // Передаем подкатегории
+                            onFavoriteClick = { /* Не используется здесь */ },
+                            onClick = { navController.navigate("product/${product.id}") }
+                        )
+                    }
+                }
             }
         }
     }

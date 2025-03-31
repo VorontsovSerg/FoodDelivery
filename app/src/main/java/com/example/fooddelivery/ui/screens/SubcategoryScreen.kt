@@ -15,8 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.data.Category
-import com.example.fooddelivery.data.Subcategory
-import com.example.fooddelivery.ui.components.SubcategoryCard
 
 @Composable
 fun SubcategoryScreen(category: Category, navController: NavController) {
@@ -26,19 +24,31 @@ fun SubcategoryScreen(category: Category, navController: NavController) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text("Подкатегории: ${category.name}", style = MaterialTheme.typography.headlineSmall)
+        Text(category.name, style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 8.dp),
+            contentPadding = PaddingValues(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(category.subcategories) { subcategory ->
-                SubcategoryCard(subcategory) {
-                    navController.navigate("products/${category.name}/${subcategory.name}")
+                Box(
+                    modifier = Modifier
+                        .size(width = 150.dp, height = 200.dp) // Такой же размер, как у категорий
+                        .background(Color(subcategory.color), MaterialTheme.shapes.large)
+                        .clickable {
+                            navController.navigate("products/${category.name}/${subcategory.name}")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        subcategory.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
                 }
             }
         }

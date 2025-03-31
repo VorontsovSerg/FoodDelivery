@@ -1,41 +1,47 @@
 package com.example.fooddelivery.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.fooddelivery.data.FoodApi
 import com.example.fooddelivery.data.Product
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import android.content.Context
+import androidx.core.content.edit
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
-class FavoritesViewModel(private val api: FoodApi) : ViewModel() {
-    private val _favoriteProducts = MutableStateFlow<List<Product>>(emptyList())
-    val favoriteProducts: StateFlow<List<Product>> = _favoriteProducts
+class FavoritesViewModel(private val context: Context) : ViewModel() {
+    private val _favorites = MutableStateFlow<List<Product>>(emptyList())
+    val favorites: StateFlow<List<Product>> = _favorites
 
     init {
         loadFavorites()
     }
 
-    private fun loadFavorites() {
-        viewModelScope.launch {
-            try {
-                _favoriteProducts.value = api.getProducts().filter { it.isFavorite }
-            } catch (e: Exception) {
-                // Обработка ошибок
-            }
+    fun toggleFavorite(product: Product) {
+        val currentFavorites = _favorites.value.toMutableList()
+        if (product.isFavorite) {
+            currentFavorites.removeAll { it.id == product.id }
+            product.isFavorite = false
+        } else {
+            currentFavorites.add(product.copy(isFavorite = true))
+            product.isFavorite = true
         }
+        _favorites.value = currentFavorites
+        saveFavorites()
     }
 
-    fun toggleFavorite(product: Product) {
-        viewModelScope.launch {
-            val updatedFavorites = _favoriteProducts.value.toMutableList()
-            val existingProduct = updatedFavorites.find { it.id == product.id }
-            if (existingProduct != null) {
-                updatedFavorites.remove(existingProduct)
-            } else {
-                updatedFavorites.add(product.copy(isFavorite = true))
-            }
-            _favoriteProducts.value = updatedFavorites
-        }
+    private fun saveFavorites() {
+        val prefs = context.getSharedPreferences("favorites", Context.MODE_PRIVATE)
+        val gson = Gson()
+        val json = gson.toJson(_favorites.value)
+        prefs.edit { putString("favorites_list", json) }
+    }
+
+    private fun loadFavorites() {
+        val prefs = context.getSharedPreferences("favorites", Context.MODE_PRIVATE)
+        val gson = Gson()
+        val json = prefs.getString("favorites_list", null)
+        val type = object : TypeToken<List<Product>>() {}.type
+        _favorites.value = if (json != null) gson.fromJson(json, type) else emptyList()
     }
 }

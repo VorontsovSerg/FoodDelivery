@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.fooddelivery.data.FoodData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.SearchViewModel
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
     val searchError = viewModel.searchError.collectAsState().value
     val scope = rememberCoroutineScope()
     var lastQuery by remember { mutableStateOf(query) }
+    val subcategories = FoodData.categories.flatMap { it.subcategories } // Получаем подкатегории из FoodData
 
     LaunchedEffect(query) {
         if (query.isNotEmpty()) {
@@ -85,6 +87,7 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
                         ) {
                             ProductCard(
                                 product = product,
+                                subcategories = subcategories, // Передаем подкатегории
                                 onFavoriteClick = { /* Не используется здесь */ },
                                 onClick = { /* Навигация не указана */ }
                             )

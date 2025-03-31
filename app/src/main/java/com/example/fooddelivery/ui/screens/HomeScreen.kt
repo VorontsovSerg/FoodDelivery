@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.fooddelivery.data.FoodData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
 import com.example.fooddelivery.viewmodel.MainViewModel
@@ -21,6 +22,7 @@ import com.example.fooddelivery.viewmodel.MainViewModel
 fun HomeScreen(viewModel: MainViewModel, navController: NavController, favoritesViewModel: FavoritesViewModel) {
     val newProducts = viewModel.newProducts.collectAsState().value
     val recommendedProducts = viewModel.recommendedProducts.collectAsState().value
+    val subcategories = FoodData.categories.flatMap { it.subcategories } // Собираем все подкатегории
 
     Column(
         modifier = Modifier
@@ -43,6 +45,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController, favorites
                 ) {
                     ProductCard(
                         product = product,
+                        subcategories = subcategories,
                         onFavoriteClick = { favoritesViewModel.toggleFavorite(it) },
                         onClick = { navController.navigate("product/${product.id}") }
                     )
@@ -66,6 +69,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController, favorites
                 ) {
                     ProductCard(
                         product = product,
+                        subcategories = subcategories,
                         onFavoriteClick = { favoritesViewModel.toggleFavorite(it) },
                         onClick = { navController.navigate("product/${product.id}") }
                     )
