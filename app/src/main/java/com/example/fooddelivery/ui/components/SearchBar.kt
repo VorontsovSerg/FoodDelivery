@@ -1,23 +1,19 @@
 package com.example.fooddelivery.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -25,69 +21,40 @@ fun SearchBar(
     searchQuery: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
-    onFocusChange: (Boolean) -> Unit
+    onFocusChange: (Boolean) -> Unit,
+    horizontalPadding: Dp = 16.dp, // Равные горизонтальные отступы по умолчанию
+    verticalPadding: Dp = 24.dp    // Равные вертикальные отступы по умолчанию
 ) {
-    val isFocused = remember { mutableStateOf(false) }
-
-    Box(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Yellow)
-            .padding(top = 24.dp, bottom = 24.dp)
+            .background(Color.Yellow) // Желтый фоновый цвет за полем поиска
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+        shape = MaterialTheme.shapes.medium // Закругленные края для всей области
     ) {
-        TextField(
+        OutlinedTextField(
             value = searchQuery,
-            onValueChange = { newValue ->
-                onQueryChange(newValue)
-            },
+            onValueChange = onQueryChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-                .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
-                .background(Color.White)
-                .align(Alignment.Center)
-                .onFocusChanged { focusState ->
-                    isFocused.value = focusState.isFocused
-                    onFocusChange(focusState.isFocused) // Уведомляем о фокусе
-                },
+                .background(Color.White), // Белый фон для поля ввода
+            placeholder = { Text("Поиск продуктов...") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search Icon",
-                    tint = Color.Black
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Clear Icon",
-                            tint = Color.Black
-                        )
-                    }
-                }
-            },
-            placeholder = {
-                Text(
-                    "Поиск",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Gray
+                    tint = Color.Gray
                 )
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    if (searchQuery.isNotEmpty()) {
-                        onSearch(searchQuery) // Поиск только при нажатии Enter и непустой строке
-                    }
-                }
-            ),
+            keyboardActions = KeyboardActions(onSearch = { onSearch(searchQuery) }),
             singleLine = true,
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-            )
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Black, // Черная обводка при фокусе
+                unfocusedBorderColor = Color.Black, // Черная обводка без фокуса
+                cursorColor = Color.Gray
+            ),
+            shape = MaterialTheme.shapes.medium // Равные закругленные края для поля ввода
         )
     }
 }

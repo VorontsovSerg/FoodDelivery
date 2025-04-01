@@ -1,89 +1,98 @@
 package com.example.fooddelivery.ui.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.fooddelivery.ProfileActivity
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route
+    val context = LocalContext.current
+
     NavigationBar(
         modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(vertical = 8.dp, horizontal = 16.dp),
-        containerColor = MaterialTheme.colorScheme.surface
+            .background(Color.LightGray)
+            .height(64.dp), // Стандартная высота нижней панели
+        containerColor = Color.LightGray
     ) {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Главная") },
-            selected = navController.currentDestination?.route == "home",
-            onClick = {
-                navController.navigate("home") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.List, contentDescription = "Каталог") },
-            selected = navController.currentDestination?.route == "catalog",
-            onClick = {
-                navController.navigate("catalog") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Favorite, contentDescription = "Избранное") },
-            selected = navController.currentDestination?.route == "favorites",
-            onClick = {
-                navController.navigate("favorites") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Корзина") },
-            selected = navController.currentDestination?.route == "cart",
-            onClick = {
-                navController.navigate("cart") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Профиль") },
-            selected = navController.currentDestination?.route == "profile",
-            onClick = {
-                navController.context.startActivity(
-                    android.content.Intent(navController.context, ProfileActivity::class.java)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween, // Равномерное распределение
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            IconButton(
+                onClick = { navController.navigate("home") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = "Home",
+                    tint = if (currentRoute == "home") MaterialTheme.colorScheme.primary else Color.DarkGray
                 )
             }
-        )
+
+            IconButton(
+                onClick = { navController.navigate("catalog") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.List,
+                    contentDescription = "Catalog",
+                    tint = if (currentRoute == "catalog") MaterialTheme.colorScheme.primary else Color.DarkGray
+                )
+            }
+
+            IconButton(
+                onClick = { navController.navigate("favorites") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favorites",
+                    tint = if (currentRoute == "favorites") MaterialTheme.colorScheme.primary else Color.DarkGray
+                )
+            }
+
+            IconButton(
+                onClick = { navController.navigate("cart") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Cart",
+                    tint = if (currentRoute == "cart") MaterialTheme.colorScheme.primary else Color.DarkGray
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    val intent = Intent(context, ProfileActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    tint = Color.DarkGray
+                )
+            }
+        }
     }
 }

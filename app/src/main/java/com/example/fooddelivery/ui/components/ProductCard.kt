@@ -24,18 +24,18 @@ import com.example.fooddelivery.data.Subcategory
 @Composable
 fun ProductCard(
     product: Product,
-    subcategories: List<Subcategory>, // Добавляем список подкатегорий
+    subcategories: List<Subcategory>,
     onFavoriteClick: (Product) -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit // Уже есть в текущей версии
 ) {
     val subcategory = subcategories.find { it.name == product.subcategory }
-    val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray // Используем цвет подкатегории или серый по умолчанию
+    val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray
 
     Box(
         modifier = Modifier
             .size(width = 150.dp, height = 200.dp)
             .background(cardColor, MaterialTheme.shapes.large)
-            .clickable { onClick() }
+            .clickable { onClick() } // Переход на ProductDetailScreen
             .padding(8.dp)
     ) {
         Column(

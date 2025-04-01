@@ -14,13 +14,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fooddelivery.data.FoodApiImpl
 import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
 import com.example.fooddelivery.ui.screens.*
 import com.example.fooddelivery.viewmodel.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalFocusManager
-import com.example.fooddelivery.data.FoodApiImpl
 
 @Composable
 fun FoodDeliveryApp() {
@@ -28,8 +28,8 @@ fun FoodDeliveryApp() {
     var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var isSearchFocused by remember { mutableStateOf(false) } // Состояние фокуса
-    val focusManager = LocalFocusManager.current // Для управления фокусом
+    var isSearchFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     val api = FoodApiImpl(context)
     val mainViewModel = MainViewModel(api)
@@ -59,7 +59,14 @@ fun FoodDeliveryApp() {
                     isSearchFocused = focused
                 }
             )
-            Box(modifier = Modifier.weight(1f)) {
+
+            // Затемнение под SearchBar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                // Основной контент (NavHost)
                 val newProducts by mainViewModel.newProducts.collectAsState()
                 val recommendedProducts by mainViewModel.recommendedProducts.collectAsState()
                 val categories by catalogViewModel.categories.collectAsState()
@@ -67,9 +74,9 @@ fun FoodDeliveryApp() {
                 NavHost(navController = navController, startDestination = "home") {
                     composable("home") { HomeScreen(mainViewModel, navController, favoritesViewModel) }
                     composable("catalog") { CatalogScreen(catalogViewModel, navController) }
-                    composable("favorites") { FavoritesScreen(favoritesViewModel) }
+                    composable("favorites") { FavoritesScreen(favoritesViewModel, navController) }
                     composable("cart") { CartScreen(cartViewModel) }
-                    composable("search") { SearchScreen(searchViewModel, searchQuery) }
+                    composable("search") { SearchScreen(searchViewModel, searchQuery, navController) }
                     composable("subcategories/{categoryName}") { backStackEntry ->
                         val categoryName = backStackEntry.arguments?.getString("categoryName")
                         val category = categories.find { it.name == categoryName }
@@ -89,32 +96,31 @@ fun FoodDeliveryApp() {
                             ?: Text("Товар не найден")
                     }
                 }
-            }
-            BottomNavigationBar(navController)
-        }
 
-        // Черный полупрозрачный квадрат при фокусе
-        if (isSearchFocused) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)) // Полупрозрачный черный
-                    .offset(y = 64.dp) // Смещение ниже строки поиска (примерная высота SearchBar)
-                    .clickable(
-                        onClick = {
-                            isSearchFocused = false
-                            focusManager.clearFocus() // Сбрасываем фокус при клике на затемнение
-                        },
-                        indication = null, // Убираем эффект нажатия
-                        interactionSource = remember { MutableInteractionSource() }
+                // Затемнение поверх NavHost, но под SearchBar
+                if (isSearchFocused) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .clickable(
+                                onClick = {
+                                    isSearchFocused = false
+                                    focusManager.clearFocus()
+                                },
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            )
                     )
-            )
+                }
+            }
+
+            BottomNavigationBar(navController)
         }
     }
 
-    // Обработка кнопки "Назад"
     BackHandler(enabled = isSearchFocused) {
         isSearchFocused = false
-        focusManager.clearFocus() // Сбрасываем фокус и убираем затемнение
+        focusManager.clearFocus()
     }
 }

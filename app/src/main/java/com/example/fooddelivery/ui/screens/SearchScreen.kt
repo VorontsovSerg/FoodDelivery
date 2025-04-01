@@ -11,18 +11,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.SearchViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchScreen(viewModel: SearchViewModel, query: String) {
+fun SearchScreen(viewModel: SearchViewModel, query: String, navController: NavController) {
     val searchResults = viewModel.searchResults.collectAsState().value
     val searchError = viewModel.searchError.collectAsState().value
     val scope = rememberCoroutineScope()
     var lastQuery by remember { mutableStateOf(query) }
-    val subcategories = FoodData.categories.flatMap { it.subcategories } // Получаем подкатегории из FoodData
+    val subcategories = FoodData.categories.flatMap { it.subcategories }
 
     LaunchedEffect(query) {
         if (query.isNotEmpty()) {
@@ -87,9 +88,9 @@ fun SearchScreen(viewModel: SearchViewModel, query: String) {
                         ) {
                             ProductCard(
                                 product = product,
-                                subcategories = subcategories, // Передаем подкатегории
+                                subcategories = subcategories,
                                 onFavoriteClick = { /* Не используется здесь */ },
-                                onClick = { /* Навигация не указана */ }
+                                onClick = { navController.navigate("product/${product.id}") }
                             )
                         }
                     }

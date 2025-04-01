@@ -13,14 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
 
 @Composable
-fun FavoritesScreen(viewModel: FavoritesViewModel) {
+fun FavoritesScreen(viewModel: FavoritesViewModel, navController: NavController) {
     val favorites = viewModel.favorites.collectAsState().value
-    val subcategories = FoodData.categories.flatMap { it.subcategories } // Получаем все подкатегории из FoodData
+    val subcategories = FoodData.categories.flatMap { it.subcategories }
 
     Column(
         modifier = Modifier
@@ -53,9 +54,9 @@ fun FavoritesScreen(viewModel: FavoritesViewModel) {
                     ) {
                         ProductCard(
                             product = product,
-                            subcategories = subcategories, // Передаем подкатегории
+                            subcategories = subcategories,
                             onFavoriteClick = { viewModel.toggleFavorite(it) },
-                            onClick = { /* Навигация не указана */ }
+                            onClick = { navController.navigate("product/${product.id}") }
                         )
                     }
                 }
