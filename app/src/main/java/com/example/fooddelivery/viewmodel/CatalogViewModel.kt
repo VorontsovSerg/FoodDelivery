@@ -7,14 +7,15 @@ import com.example.fooddelivery.data.FoodApi
 import com.example.fooddelivery.data.Product
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CatalogViewModel(private val api: FoodApi) : ViewModel() {
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
-    private val _subcategoryProducts = MutableStateFlow<List<Product>>(emptyList())
-    val subcategoryProducts: StateFlow<List<Product>> = _subcategoryProducts
+    private val _productsBySubcategory = MutableStateFlow<List<Product>>(emptyList())
+    val productsBySubcategory: StateFlow<List<Product>> = _productsBySubcategory.asStateFlow()
 
     init {
         loadCategories()
@@ -22,24 +23,14 @@ class CatalogViewModel(private val api: FoodApi) : ViewModel() {
 
     private fun loadCategories() {
         viewModelScope.launch {
-            try {
-                _categories.value = api.getCategories()
-            } catch (e: Exception) {
-                // Обработка ошибок
-            }
+            _categories.value = api.getCategories() // Вызов suspend-функции внутри корутины
         }
     }
 
-    fun loadProductsForSubcategory(category: String, subcategory: String) {
+    fun getProductsBySubcategory(categoryName: String, subcategoryName: String): StateFlow<List<Product>> {
         viewModelScope.launch {
-            try {
-                val products = api.getProducts()
-                _subcategoryProducts.value = products.filter {
-                    it.category == category && it.subcategory == subcategory
-                }
-            } catch (e: Exception) {
-                // Обработка ошибок
-            }
+            _productsBySubcategory.value = api.getProductsBySubcategory(categoryName, subcategoryName) // Вызов suspend-функции внутри корутины
         }
+        return productsBySubcategory
     }
 }

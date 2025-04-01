@@ -26,7 +26,7 @@ fun ProductsBySubcategoryScreen(
     navController: NavController
 ) {
     val products = viewModel.getProductsBySubcategory(categoryName, subcategoryName).collectAsState().value
-    val subcategories = FoodData.categories.flatMap { it.subcategories } // Получаем подкатегории из FoodData
+    val subcategories = FoodData.categories.flatMap { it.subcategories }
 
     Column(
         modifier = Modifier

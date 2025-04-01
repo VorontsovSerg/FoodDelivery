@@ -33,16 +33,16 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Yellow)
-            .padding(top = 16.dp, bottom = 16.dp)
+            .padding(top = 24.dp, bottom = 24.dp)
     ) {
         TextField(
             value = searchQuery,
             onValueChange = { newValue ->
-                onQueryChange(newValue) // Только обновляем текст, поиск не запускается
+                onQueryChange(newValue)
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 12.dp)
                 .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
                 .background(Color.White)
                 .align(Alignment.Center)
