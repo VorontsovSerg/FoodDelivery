@@ -2,7 +2,6 @@ package com.example.fooddelivery.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.fooddelivery.ProfileData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
