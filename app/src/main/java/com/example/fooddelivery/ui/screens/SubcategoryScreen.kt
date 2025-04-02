@@ -37,7 +37,7 @@ fun SubcategoryScreen(category: Category, navController: NavController) {
             items(category.subcategories) { subcategory ->
                 Box(
                     modifier = Modifier
-                        .size(width = 150.dp, height = 200.dp) // Такой же размер, как у категорий
+                        .size(width = 150.dp, height = 70.dp) // Такой же размер, как у категорий
                         .background(Color(subcategory.color), MaterialTheme.shapes.large)
                         .clickable {
                             navController.navigate("products/${category.name}/${subcategory.name}")
@@ -46,7 +46,7 @@ fun SubcategoryScreen(category: Category, navController: NavController) {
                 ) {
                     Text(
                         subcategory.name,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = Color.White
                     )
                 }

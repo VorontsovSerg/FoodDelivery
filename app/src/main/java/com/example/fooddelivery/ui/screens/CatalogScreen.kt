@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.viewmodel.CatalogViewModel
@@ -40,14 +41,14 @@ fun CatalogScreen(viewModel: CatalogViewModel, navController: NavController) {
             items(categories) { category ->
                 Box(
                     modifier = Modifier
-                        .size(width = 150.dp, height = 200.dp) // Такой же размер, как у подкатегорий
+                        .size(width = 150.dp, height = 70.dp) // Такой же размер, как у подкатегорий
                         .background(Color(category.gradient.first()), MaterialTheme.shapes.large)
                         .clickable { navController.navigate("subcategories/${category.name}") },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         category.name,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = Color.White
                     )
                 }
