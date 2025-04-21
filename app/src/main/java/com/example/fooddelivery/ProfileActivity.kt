@@ -36,14 +36,16 @@ class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ProfileScreen(textSize = 18.sp) // Теперь тип TextUnit
+            ProfileScreen(textSize = 18.sp)
         }
     }
 
     @Composable
-    fun ProfileScreen(textSize: TextUnit) { // Изменен тип с Float на TextUnit
+    fun ProfileScreen(textSize: TextUnit) {
         val navController = rememberNavController()
         var profile by remember { mutableStateOf(Persistence.loadProfile(this) ?: ProfileData()) }
+        val app = applicationContext as App
+        var isDarkTheme by remember { mutableStateOf(app.darkTheme) }
 
         NavHost(navController = navController, startDestination = "profile") {
             composable("profile") {
@@ -52,9 +54,8 @@ class ProfileActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(Color.White)
                         .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally // Аватар по центру
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Кнопка редактирования профиля в правом верхнем углу
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -70,10 +71,9 @@ class ProfileActivity : ComponentActivity() {
                         }
                     }
 
-                    // Аватар с круглой маской
                     Box(
                         modifier = Modifier
-                            .size(200.dp)
+                            .size(150.dp)
                             .clip(CircleShape)
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
@@ -94,13 +94,12 @@ class ProfileActivity : ComponentActivity() {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Информация профиля в 3 строки с выравниванием текста по левому краю
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .align(Alignment.Start) // Выравнивание текста по левому краю
+                            .align(Alignment.Start)
                     ) {
                         Text(
                             text = buildAnnotatedString {
@@ -109,7 +108,7 @@ class ProfileActivity : ComponentActivity() {
                                 append(profile.username)
                                 pop()
                             },
-                            style = TextStyle(fontSize = textSize, color = Color.Black) // Используем TextUnit
+                            style = TextStyle(fontSize = textSize, color = Color.Black)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -133,6 +132,22 @@ class ProfileActivity : ComponentActivity() {
                             },
                             style = TextStyle(fontSize = textSize, color = Color.Black)
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Переключатель темной темы
+                        Switch(
+                            checked = isDarkTheme,
+                            onCheckedChange = { checked ->
+                                isDarkTheme = checked
+                                app.switchTheme(checked)
+                            },
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+                        Text(
+                            text = "Темная тема",
+                            style = TextStyle(fontSize = textSize, color = Color.Black),
+                            modifier = Modifier.align(Alignment.Start)
+                        )
                     }
                 }
             }
@@ -141,7 +156,7 @@ class ProfileActivity : ComponentActivity() {
                     navController = navController,
                     initialProfile = profile,
                     onProfileUpdated = { updatedProfile ->
-                        profile = updatedProfile // Автоматическое обновление
+                        profile = updatedProfile
                     }
                 )
             }

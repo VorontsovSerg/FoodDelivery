@@ -1,0 +1,139 @@
+package com.example.fooddelivery.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.fooddelivery.data.Product
+import com.example.fooddelivery.data.Subcategory
+import com.example.fooddelivery.viewmodel.SearchViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@Composable
+fun SearchResults(
+    query: String,
+    viewModel: SearchViewModel,
+    subcategories: List<Subcategory>,
+    onProductClick: (Product) -> Unit
+) {
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(true) }
+    val products by viewModel.searchResults.collectAsState()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(query) {
+        isLoading = true
+        viewModel.searchProducts(query)
+        delay(1000L)
+        isLoading = false
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Результаты поиска для \"$query\"",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(44.dp),
+                color = Color.Black
+            )
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(products) { product ->
+                    ProductCard(
+                        product = product,
+                        subcategories = subcategories,
+                        onClick = { onProductClick(product) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductCard(
+    product: Product,
+    subcategories: List<Subcategory>,
+    onClick: () -> Unit
+) {
+    val subcategory = subcategories.find { it.name == product.subcategory }
+    val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray
+
+    Box(
+        modifier = Modifier
+            .size(width = 150.dp, height = 200.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .shadow(4.dp, RoundedCornerShape(12.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
+            .background(cardColor)
+            .clickable { onClick() }
+            .padding(8.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White)
+            ) {
+                AsyncImage(
+                    model = product.images.firstOrNull() ?: "",
+                    contentDescription = product.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    error = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha),
+                    placeholder = painterResource(androidx.appcompat.R.drawable.abc_ic_menu_paste_mtrl_am_alpha)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = product.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${product.price} ₽",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White
+            )
+        }
+    }
+}

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,27 +18,28 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.fooddelivery.ProfileActivity
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val navBackStackEntry = navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry.value?.destination?.route
+fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Unit = {}) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
 
     NavigationBar(
         modifier = Modifier
             .background(Color.LightGray)
-            .height(64.dp), // Стандартная высота нижней панели
+            .height(64.dp),
         containerColor = Color.LightGray
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween, // Равномерное распределение
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             IconButton(
-                onClick = { navController.navigate("home") },
+                onClick = {
+                    onNavigate("home")
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -48,7 +50,9 @@ fun BottomNavigationBar(navController: NavController) {
             }
 
             IconButton(
-                onClick = { navController.navigate("catalog") },
+                onClick = {
+                    onNavigate("catalog")
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -59,7 +63,9 @@ fun BottomNavigationBar(navController: NavController) {
             }
 
             IconButton(
-                onClick = { navController.navigate("favorites") },
+                onClick = {
+                    onNavigate("favorites")
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -70,7 +76,9 @@ fun BottomNavigationBar(navController: NavController) {
             }
 
             IconButton(
-                onClick = { navController.navigate("cart") },
+                onClick = {
+                    onNavigate("cart")
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(

@@ -2,8 +2,8 @@ package com.example.fooddelivery.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,6 +19,7 @@ import coil.compose.AsyncImage
 import com.example.fooddelivery.data.Product
 import com.example.fooddelivery.viewmodel.CartViewModel
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProductDetailScreen(
@@ -28,7 +29,9 @@ fun ProductDetailScreen(
 ) {
     var isFavorite by remember { mutableStateOf(product.isFavorite) }
     var cartCount by remember { mutableStateOf(cartViewModel.cartItems.value.find { it.product.id == product.id }?.quantity ?: 0) }
-    val images = product.images // Используем список изображений из модели
+    val images = product.images.filterNotNull() // Фильтруем null изображения
+    val pagerState = rememberPagerState(pageCount = { images.size })
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -36,21 +39,23 @@ fun ProductDetailScreen(
             .background(Color.White)
             .padding(16.dp)
     ) {
-        // Карусель изображений
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(images) { imageUrl ->
+        // Image Slider
+        if (images.isNotEmpty()) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) { page ->
                 Box(
                     modifier = Modifier
-                        .size(200.dp)
+                        .fillMaxSize()
                         .clip(RoundedCornerShape(12.dp))
                         .shadow(8.dp, RoundedCornerShape(12.dp))
                         .background(Color.White)
                 ) {
                     AsyncImage(
-                        model = imageUrl,
+                        model = images[page],
                         contentDescription = product.name,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
@@ -59,23 +64,35 @@ fun ProductDetailScreen(
                     )
                 }
             }
-        }
 
-        // Счетчик изображений
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            repeat(images.size) { index ->
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(if (index == 0) Color.Black else Color.Gray)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+            // Индикаторы слайдера
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(images.size) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(if (index == pagerState.currentPage) Color.Black else Color.Gray)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
+        } else {
+            // Заглушка, если изображений нет
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Gray),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Изображения отсутствуют", color = Color.White)
             }
         }
 
@@ -86,7 +103,7 @@ fun ProductDetailScreen(
         Text("Цена: ${product.price} ₽", style = MaterialTheme.typography.bodyLarge)
         Text("Категория: ${product.category}", style = MaterialTheme.typography.bodyMedium)
         Text("Подкатегория: ${product.subcategory}", style = MaterialTheme.typography.bodyMedium)
-        Text("Описание: ${product.description}", style = MaterialTheme.typography.bodySmall) // Используем описание из модели
+        Text("Описание: ${product.description}", style = MaterialTheme.typography.bodySmall)
 
         // Характеристики
         Spacer(modifier = Modifier.height(8.dp))

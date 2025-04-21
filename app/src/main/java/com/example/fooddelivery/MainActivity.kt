@@ -1,6 +1,8 @@
 package com.example.fooddelivery
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -10,22 +12,33 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.fooddelivery.data.FoodApiImpl
+import com.example.fooddelivery.data.Product
 import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
+import com.example.fooddelivery.ui.components.SearchResults
 import com.example.fooddelivery.ui.screens.*
 import com.example.fooddelivery.viewmodel.*
-import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalFocusManager
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            FoodDeliveryApp()
+        }
+    }
+}
 
 @Composable
 fun FoodDeliveryApp() {
     val navController = rememberNavController()
     var searchQuery by remember { mutableStateOf("") }
+    var currentQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isSearchFocused by remember { mutableStateOf(false) }
@@ -52,7 +65,11 @@ fun FoodDeliveryApp() {
                 onSearch = { query ->
                     scope.launch {
                         searchViewModel.searchProducts(query)
-                        if (query.isNotEmpty()) navController.navigate("search")
+                        currentQuery = query
+                        searchQuery = ""
+                        isSearchFocused = false
+                        focusManager.clearFocus()
+                        navController.navigate("search")
                     }
                 },
                 onFocusChange = { focused ->
@@ -60,23 +77,36 @@ fun FoodDeliveryApp() {
                 }
             )
 
-            // Затемнение под SearchBar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                // Основной контент (NavHost)
                 val newProducts by mainViewModel.newProducts.collectAsState()
                 val recommendedProducts by mainViewModel.recommendedProducts.collectAsState()
                 val categories by catalogViewModel.categories.collectAsState()
+                val subcategories by catalogViewModel.subcategories.collectAsState()
 
                 NavHost(navController = navController, startDestination = "home") {
-                    composable("home") { HomeScreen(mainViewModel, navController, favoritesViewModel) }
+                    composable("home") {
+                        HomeScreen(mainViewModel, navController, favoritesViewModel)
+                    }
                     composable("catalog") { CatalogScreen(catalogViewModel, navController) }
                     composable("favorites") { FavoritesScreen(favoritesViewModel, navController) }
                     composable("cart") { CartScreen(cartViewModel) }
-                    composable("search") { SearchScreen(searchViewModel, searchQuery, navController) }
+                    composable("search") {
+                        SearchResults(
+                            query = currentQuery,
+                            viewModel = searchViewModel,
+                            subcategories = subcategories,
+                            onProductClick = { product ->
+                                scope.launch {
+                                    searchViewModel.searchProducts(currentQuery)
+                                    navController.navigate("product/${product.id}")
+                                }
+                            }
+                        )
+                    }
                     composable("subcategories/{categoryName}") { backStackEntry ->
                         val categoryName = backStackEntry.arguments?.getString("categoryName")
                         val category = categories.find { it.name == categoryName }
@@ -97,7 +127,6 @@ fun FoodDeliveryApp() {
                     }
                 }
 
-                // Затемнение поверх NavHost, но под SearchBar
                 if (isSearchFocused) {
                     Box(
                         modifier = Modifier
@@ -115,7 +144,16 @@ fun FoodDeliveryApp() {
                 }
             }
 
-            BottomNavigationBar(navController)
+            BottomNavigationBar(navController) { route ->
+                if (route == "home") {
+                    currentQuery = ""
+                    searchQuery = ""
+                }
+                navController.navigate(route) {
+                    popUpTo(navController.graph.startDestinationId)
+                    launchSingleTop = true
+                }
+            }
         }
     }
 

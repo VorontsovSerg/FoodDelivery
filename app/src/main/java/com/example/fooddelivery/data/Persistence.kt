@@ -1,61 +1,68 @@
 package com.example.fooddelivery.data
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 object Persistence {
-    private const val PREFS_NAME = "FoodDeliveryPrefs"
-    private const val KEY_FAVORITES = "favorites"
-    private const val KEY_CART = "cart"
-    private const val KEY_PROFILE = "profile"
+    private const val PROFILE_PREFS = "profile_prefs"
+    private const val SEARCH_HISTORY_PREFS = "search_history_prefs"
+    private const val SEARCH_HISTORY_KEY = "search_history"
+    private const val CART_PREFS = "cart_prefs"
+    private const val CART_KEY = "cart"
 
-    private fun getPrefs(context: Context): SharedPreferences =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    // Избранное
-    fun saveFavorites(context: Context, favoriteIds: Set<Int>) {
-        getPrefs(context).edit().putStringSet(KEY_FAVORITES, favoriteIds.map { it.toString() }.toSet()).apply()
-    }
-
-    fun loadFavorites(context: Context): Set<Int> {
-        val favorites = getPrefs(context).getStringSet(KEY_FAVORITES, emptySet()) ?: emptySet()
-        return favorites.map { it.toInt() }.toSet()
-    }
-
-    // Корзина
-    fun saveCart(context: Context, cartItems: List<CartItem>) {
-        val gson = Gson()
-        val json = gson.toJson(cartItems)
-        getPrefs(context).edit().putString(KEY_CART, json).apply()
-    }
-
-    fun loadCart(context: Context): List<CartItem> {
-        val gson = Gson()
-        val json = getPrefs(context).getString(KEY_CART, null)
-        return if (json != null) {
-            val type = object : TypeToken<List<CartItem>>() {}.type
-            gson.fromJson(json, type)
-        } else {
-            emptyList()
-        }
-    }
-
-    // Профиль
     fun saveProfile(context: Context, profile: ProfileData) {
+        val prefs = context.getSharedPreferences(PROFILE_PREFS, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
         val gson = Gson()
         val json = gson.toJson(profile)
-        getPrefs(context).edit().putString(KEY_PROFILE, json).apply()
+        editor.putString("profile", json)
+        editor.apply()
     }
 
     fun loadProfile(context: Context): ProfileData? {
+        val prefs = context.getSharedPreferences(PROFILE_PREFS, Context.MODE_PRIVATE)
         val gson = Gson()
-        val json = getPrefs(context).getString(KEY_PROFILE, null)
-        return if (json != null) {
-            gson.fromJson(json, ProfileData::class.java)
-        } else {
-            null
-        }
+        val json = prefs.getString("profile", null) ?: return null
+        return gson.fromJson(json, ProfileData::class.java)
+    }
+
+    fun saveSearchHistory(context: Context, history: List<String>) {
+        val prefs = context.getSharedPreferences(SEARCH_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val gson = Gson()
+        val json = gson.toJson(history.take(10))
+        editor.putString(SEARCH_HISTORY_KEY, json)
+        editor.apply()
+    }
+
+    fun loadSearchHistory(context: Context): List<String> {
+        val prefs = context.getSharedPreferences(SEARCH_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val gson = Gson()
+        val json = prefs.getString(SEARCH_HISTORY_KEY, null) ?: return emptyList()
+        val type = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    fun clearSearchHistory(context: Context) {
+        val prefs = context.getSharedPreferences(SEARCH_HISTORY_PREFS, Context.MODE_PRIVATE)
+        prefs.edit().clear().apply()
+    }
+
+    fun saveCart(context: Context, cartItems: List<CartItem>) {
+        val prefs = context.getSharedPreferences(CART_PREFS, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val gson = Gson()
+        val json = gson.toJson(cartItems)
+        editor.putString(CART_KEY, json)
+        editor.apply()
+    }
+
+    fun loadCart(context: Context): List<CartItem> {
+        val prefs = context.getSharedPreferences(CART_PREFS, Context.MODE_PRIVATE)
+        val gson = Gson()
+        val json = prefs.getString(CART_KEY, null) ?: return emptyList()
+        val type = object : TypeToken<List<CartItem>>() {}.type
+        return gson.fromJson(json, type) ?: emptyList()
     }
 }
