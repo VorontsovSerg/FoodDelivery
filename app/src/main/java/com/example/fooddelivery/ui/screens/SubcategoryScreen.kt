@@ -21,10 +21,14 @@ fun SubcategoryScreen(category: Category, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text(category.name, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = category.name,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyVerticalGrid(
@@ -37,17 +41,20 @@ fun SubcategoryScreen(category: Category, navController: NavController) {
             items(category.subcategories) { subcategory ->
                 Box(
                     modifier = Modifier
-                        .size(width = 150.dp, height = 70.dp) // Такой же размер, как у категорий
-                        .background(Color(subcategory.color), MaterialTheme.shapes.large)
+                        .size(width = 120.dp, height = 70.dp)
+                        .background(
+                            color = subcategory.color?.let { Color(it) } ?: MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.large
+                        )
                         .clickable {
                             navController.navigate("products/${category.name}/${subcategory.name}")
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        subcategory.name,
+                        text = subcategory.name,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.fooddelivery
 
+import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,13 +24,20 @@ import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
 import com.example.fooddelivery.ui.components.SearchResults
 import com.example.fooddelivery.ui.screens.*
+import com.example.fooddelivery.utils.ThemeManager
 import com.example.fooddelivery.viewmodel.*
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FoodDeliveryApp()
+            val context = LocalContext.current
+            val isDarkTheme = remember { mutableStateOf(ThemeManager.isDarkTheme(context)) }
+
+            ThemeManager.FoodDeliveryTheme(isDarkTheme = isDarkTheme.value) {
+                FoodDeliveryApp()
+            }
         }
     }
 }
@@ -57,7 +65,7 @@ fun FoodDeliveryApp() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             SearchBar(
                 searchQuery = searchQuery,
@@ -85,7 +93,7 @@ fun FoodDeliveryApp() {
                 val newProducts by mainViewModel.newProducts.collectAsState()
                 val recommendedProducts by mainViewModel.recommendedProducts.collectAsState()
                 val categories by catalogViewModel.categories.collectAsState()
-                val subcategories by catalogViewModel.subcategories.collectAsState()
+                val subcategories = categories.flatMap { it.subcategories }
 
                 NavHost(navController = navController, startDestination = "home") {
                     composable("home") {
@@ -131,7 +139,7 @@ fun FoodDeliveryApp() {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
+                            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
                             .clickable(
                                 onClick = {
                                     isSearchFocused = false

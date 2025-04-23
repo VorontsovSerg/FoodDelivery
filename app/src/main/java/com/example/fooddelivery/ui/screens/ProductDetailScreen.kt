@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -36,7 +35,7 @@ fun ProductDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         // Image Slider
@@ -52,7 +51,7 @@ fun ProductDetailScreen(
                         .fillMaxSize()
                         .clip(RoundedCornerShape(12.dp))
                         .shadow(8.dp, RoundedCornerShape(12.dp))
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
                     AsyncImage(
                         model = images[page],
@@ -77,7 +76,10 @@ fun ProductDetailScreen(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(if (index == pagerState.currentPage) Color.Black else Color.Gray)
+                            .background(
+                                if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
@@ -89,26 +91,53 @@ fun ProductDetailScreen(
                     .fillMaxWidth()
                     .height(200.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Gray),
+                    .background(MaterialTheme.colorScheme.secondary),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Изображения отсутствуют", color = Color.White)
+                Text(
+                    text = "Изображения отсутствуют",
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Информация о товаре
-        Text(product.name, style = MaterialTheme.typography.headlineMedium)
-        Text("Цена: ${product.price} ₽", style = MaterialTheme.typography.bodyLarge)
-        Text("Категория: ${product.category}", style = MaterialTheme.typography.bodyMedium)
-        Text("Подкатегория: ${product.subcategory}", style = MaterialTheme.typography.bodyMedium)
-        Text("Описание: ${product.description}", style = MaterialTheme.typography.bodySmall)
+        Text(
+            text = product.name,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Цена: ${product.price} ₽",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Категория: ${product.category}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Подкатегория: ${product.subcategory}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Описание: ${product.description}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
 
         // Характеристики
         Spacer(modifier = Modifier.height(8.dp))
         product.attributes.forEach { (key, value) ->
-            Text("$key: $value", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "$key: $value",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -119,12 +148,12 @@ fun ProductDetailScreen(
                 isFavorite = !isFavorite
                 favoritesViewModel.toggleFavorite(product.copy(isFavorite = isFavorite))
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = if (isFavorite) "В Избранном" else "Добавить в избранное",
-                color = if (isFavorite) Color.Red else Color.Black,
+                color = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -138,10 +167,13 @@ fun ProductDetailScreen(
                     cartCount++
                     cartViewModel.addToCart(product)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Yellow),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Добавить в корзину", color = Color.Black)
+                Text(
+                    text = "Добавить в корзину",
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         } else {
             Row(
@@ -154,20 +186,31 @@ fun ProductDetailScreen(
                         cartCount--
                         cartViewModel.updateQuantity(product.id, -1)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) { Text("-") }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Text(
+                        text = "-",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 Text(
-                    "$cartCount в корзине",
+                    text = "$cartCount в корзине",
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Button(
                     onClick = {
                         cartCount++
                         cartViewModel.updateQuantity(product.id, 1)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) { Text("+") }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Text(
+                        text = "+",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }

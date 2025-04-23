@@ -23,6 +23,7 @@ material3 = "1.3.1"
 navigationCompose = "2.8.9"
 retrofit = "2.9.0"
 uiToolingPreviewAndroid = "1.7.8"
+datastoreCoreAndroid = "1.1.4"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -50,6 +51,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -8,5 +8,5 @@ data class Category(
 
 data class Subcategory(
     val name: String,
-    val color: Long, // цвет карточки
+    val color: Long,
 )

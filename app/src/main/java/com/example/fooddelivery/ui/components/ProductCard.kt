@@ -26,7 +26,7 @@ fun ProductCard(
     product: Product,
     subcategories: List<Subcategory>,
     onFavoriteClick: (Product) -> Unit,
-    onClick: () -> Unit // Уже есть в текущей версии
+    onClick: () -> Unit
 ) {
     val subcategory = subcategories.find { it.name == product.subcategory }
     val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray

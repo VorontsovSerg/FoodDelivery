@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
@@ -27,10 +26,14 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController, favorites
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text("Новинки", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Новинки",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             modifier = Modifier.wrapContentHeight(),
@@ -54,7 +57,11 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController, favorites
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Рекомендуем", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Рекомендуем",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             modifier = Modifier.wrapContentHeight(),

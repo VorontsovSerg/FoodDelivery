@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
@@ -23,43 +22,36 @@ fun FavoritesScreen(viewModel: FavoritesViewModel, navController: NavController)
     val favorites = viewModel.favorites.collectAsState().value
     val subcategories = FoodData.categories.flatMap { it.subcategories }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
-        Text("Избранное", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (favorites.isEmpty()) {
+    if (favorites.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                "Нет избранных товаров",
+                text = "Нет избранных товаров",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                color = MaterialTheme.colorScheme.onBackground
             )
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(favorites) { product ->
-                    Box(
-                        modifier = Modifier
-                            .size(width = 150.dp, height = 200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        ProductCard(
-                            product = product,
-                            subcategories = subcategories,
-                            onFavoriteClick = { viewModel.toggleFavorite(it) },
-                            onClick = { navController.navigate("product/${product.id}") }
-                        )
-                    }
-                }
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(favorites) { product ->
+                ProductCard(
+                    product = product,
+                    subcategories = subcategories,
+                    onFavoriteClick = { viewModel.toggleFavorite(it) },
+                    onClick = { navController.navigate("product/${product.id}") }
+                )
             }
         }
     }

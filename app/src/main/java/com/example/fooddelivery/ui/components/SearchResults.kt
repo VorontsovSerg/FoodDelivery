@@ -48,20 +48,21 @@ fun SearchResults(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Результаты поиска для \"$query\"",
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(44.dp),
-                color = Color.Black
+                color = MaterialTheme.colorScheme.primary
             )
         } else {
             LazyVerticalGrid(
@@ -90,13 +91,14 @@ fun ProductCard(
 ) {
     val subcategory = subcategories.find { it.name == product.subcategory }
     val cardColor = subcategory?.color?.let { Color(it) } ?: Color.Gray
+    val textColor = if (isColorLight(cardColor)) Color.Black else Color.White
 
     Box(
         modifier = Modifier
             .size(width = 150.dp, height = 200.dp)
             .clip(RoundedCornerShape(12.dp))
             .shadow(4.dp, RoundedCornerShape(12.dp))
-            .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.onSurface, RoundedCornerShape(12.dp))
             .background(cardColor)
             .clickable { onClick() }
             .padding(8.dp)
@@ -110,7 +112,7 @@ fun ProductCard(
                 modifier = Modifier
                     .size(110.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 AsyncImage(
                     model = product.images.firstOrNull() ?: "",
@@ -125,15 +127,21 @@ fun ProductCard(
             Text(
                 text = product.name,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White,
+                color = textColor,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "${product.price} ₽",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White
+                color = textColor
             )
         }
     }
+}
+
+// Функция для определения яркости цвета
+private fun isColorLight(color: Color): Boolean {
+    val luminance = (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue)
+    return luminance > 0.5
 }

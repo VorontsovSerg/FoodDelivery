@@ -1,9 +1,12 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.FoodDelivery" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+    <style name="Theme.FoodDelivery" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/yellow_primary</item>
+        <item name="colorOnPrimary">@color/yellow_on_primary</item>
+        <item name="colorPrimaryContainer">@color/yellow_primary</item>
+        <item name="colorOnPrimaryContainer">@color/yellow_on_primary</item>
+        <item name="android:colorBackground">@color/yellow_background</item>
+        <item name="colorOnBackground">@color/yellow_on_background</item>
+        <item name="colorSurface">@color/yellow_surface</item>
+        <item name="colorOnSurface">@color/yellow_on_surface</item>
     </style>
-
-    <style name="Theme.FoodDelivery" parent="Base.Theme.FoodDelivery" />
 </resources>

@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
@@ -34,10 +33,14 @@ fun SearchScreen(viewModel: SearchViewModel, query: String, navController: NavCo
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text("Результаты поиска для \"$query\"", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Результаты поиска для \"$query\"",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
@@ -48,9 +51,9 @@ fun SearchScreen(viewModel: SearchViewModel, query: String, navController: NavCo
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Ошибка поиска: $searchError",
+                        text = "Ошибка поиска: $searchError",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Red
+                        color = MaterialTheme.colorScheme.error
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
@@ -59,16 +62,20 @@ fun SearchScreen(viewModel: SearchViewModel, query: String, navController: NavCo
                                 viewModel.searchProducts(lastQuery)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Text("Обновить", color = Color.White)
+                        Text(
+                            text = "Обновить",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
             searchResults.isEmpty() && query.isNotEmpty() -> {
                 Text(
-                    "Ничего не найдено",
+                    text = "Ничего не найдено",
                     style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }

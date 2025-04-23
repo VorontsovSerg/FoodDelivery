@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
@@ -42,7 +41,7 @@ fun SearchBar(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Yellow)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         shape = MaterialTheme.shapes.medium
     ) {
@@ -56,17 +55,17 @@ fun SearchBar(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .onFocusChanged { focusState ->
                         showHistory = focusState.isFocused
                         onFocusChange(focusState.isFocused)
                     },
-                placeholder = { Text("Поиск продуктов...") },
+                placeholder = { Text("Поиск продуктов...", color = MaterialTheme.colorScheme.onSurface) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
@@ -81,9 +80,9 @@ fun SearchBar(
                 }),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Gray
+                    focusedBorderColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = MaterialTheme.shapes.medium
             )
@@ -93,12 +92,13 @@ fun SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 200.dp)
-                        .background(Color.LightGray)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
                     items(searchHistory) { historyItem ->
                         Text(
                             text = historyItem,
                             fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
@@ -115,7 +115,11 @@ fun SearchBar(
                         Persistence.clearSearchHistory(context)
                         searchHistory = emptyList()
                     },
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text("Очистить историю")
                 }

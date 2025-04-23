@@ -2,6 +2,7 @@ package com.example.fooddelivery.ui.components
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,11 +24,12 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
 
-    NavigationBar(
+    Box(
         modifier = Modifier
-            .background(Color.LightGray)
-            .height(64.dp),
-        containerColor = Color.LightGray
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 0.dp, bottomEnd = 0.dp))
     ) {
         Row(
             modifier = Modifier
@@ -45,9 +47,17 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
                 Icon(
                     imageVector = Icons.Default.Home,
                     contentDescription = "Home",
-                    tint = if (currentRoute == "home") MaterialTheme.colorScheme.primary else Color.DarkGray
+                    tint = if (currentRoute == "home") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            // Разделитель
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+            )
 
             IconButton(
                 onClick = {
@@ -58,9 +68,17 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
                 Icon(
                     imageVector = Icons.Default.List,
                     contentDescription = "Catalog",
-                    tint = if (currentRoute == "catalog") MaterialTheme.colorScheme.primary else Color.DarkGray
+                    tint = if (currentRoute == "catalog") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            // Разделитель
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+            )
 
             IconButton(
                 onClick = {
@@ -71,9 +89,17 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
                 Icon(
                     imageVector = Icons.Default.Favorite,
                     contentDescription = "Favorites",
-                    tint = if (currentRoute == "favorites") MaterialTheme.colorScheme.primary else Color.DarkGray
+                    tint = if (currentRoute == "favorites") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            // Разделитель
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+            )
 
             IconButton(
                 onClick = {
@@ -84,9 +110,17 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
                     contentDescription = "Cart",
-                    tint = if (currentRoute == "cart") MaterialTheme.colorScheme.primary else Color.DarkGray
+                    tint = if (currentRoute == "cart") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            // Разделитель
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+            )
 
             IconButton(
                 onClick = {
@@ -98,7 +132,7 @@ fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Un
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Profile",
-                    tint = Color.DarkGray
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

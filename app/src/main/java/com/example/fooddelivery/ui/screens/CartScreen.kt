@@ -3,6 +3,7 @@ package com.example.fooddelivery.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,7 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.fooddelivery.data.CartItem
 import com.example.fooddelivery.viewmodel.CartViewModel
@@ -22,34 +23,44 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import android.content.Intent
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import com.example.fooddelivery.PaymentActivity
 
 @Composable
 fun CartScreen(viewModel: CartViewModel) {
     val cartItems = viewModel.cartItems.collectAsState().value
     val totalPrice by viewModel.totalPrice.collectAsState()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text("Корзина", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Корзина",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         if (cartItems.isEmpty()) {
             Text(
-                "Корзина пуста",
+                text = "Корзина пуста",
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color.Black, MaterialTheme.shapes.medium) // Черная обводка
-                    .background(Color.White)
-                    .padding(8.dp) // Отступы от карточек
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface, MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(8.dp)
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
@@ -59,7 +70,7 @@ fun CartScreen(viewModel: CartViewModel) {
                         CartItemRow(item, viewModel, cartItems.size > 1, index + 1)
                         if (index < cartItems.size - 1 && cartItems.size > 1) {
                             DashedDivider(
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 thickness = 1.dp,
                                 dashLength = 4.dp,
                                 gapLength = 4.dp,
@@ -72,7 +83,30 @@ fun CartScreen(viewModel: CartViewModel) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Итого: $totalPrice ₽", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = "Итого: $totalPrice ₽",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, PaymentActivity::class.java))
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onBackground,
+                    contentColor = MaterialTheme.colorScheme.background
+                ),
+                shape = CircleShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text(
+                    text = "Оплатить",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 }
@@ -80,96 +114,89 @@ fun CartScreen(viewModel: CartViewModel) {
 @Composable
 fun CartItemRow(cartItem: CartItem, viewModel: CartViewModel, showQuantityButtons: Boolean, itemNumber: Int) {
     var quantity by remember { mutableStateOf(cartItem.quantity) }
-    var expanded by remember { mutableStateOf(false) } // Состояние всплывающего меню
+    var expanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp), // Без фона, только отступы
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Нумерация и название с ценой
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "$itemNumber. ${cartItem.product.name}",
+                text = "$itemNumber. ${cartItem.product.name}",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black // Черный текст
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "${cartItem.product.price} ₽",
+                text = "${cartItem.product.price} ₽",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Black // Черный текст
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
-        // Кнопки +/- для количества (только если > 1 товара)
         if (showQuantityButtons) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedButton(
-                    onClick = {
-                        if (quantity > 1) {
-                            quantity--
-                            viewModel.updateQuantity(cartItem.product.id, -1)
-                        } else {
-                            viewModel.removeFromCart(cartItem.product.id) // Удаление при 1
-                            quantity = 0
-                        }
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black // Явно черный текст
-                    ),
-                    border = BorderStroke(1.dp, Color.Black),
-                    modifier = Modifier.size(32.dp)
-                ) { Text("-", style = MaterialTheme.typography.bodyMedium) }
-
                 Text(
-                    "$quantity",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Black // Черный текст
+                    text = "−",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            if (quantity > 1) {
+                                quantity--
+                                viewModel.updateQuantity(cartItem.product.id, -1)
+                            } else {
+                                viewModel.removeFromCart(cartItem.product.id)
+                                quantity = 0
+                            }
+                        }
                 )
-
-                OutlinedButton(
-                    onClick = {
-                        quantity++
-                        viewModel.updateQuantity(cartItem.product.id, 1)
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black // Явно черный текст
-                    ),
-                    border = BorderStroke(1.dp, Color.Black),
-                    modifier = Modifier.size(32.dp)
-                ) { Text("+", style = MaterialTheme.typography.bodyMedium) }
+                Text(
+                    text = "$quantity",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "+",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            quantity++
+                            viewModel.updateQuantity(cartItem.product.id, 1)
+                        }
+                )
             }
         } else {
             Text(
-                "$quantity шт.",
+                text = "$quantity шт.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
 
-        // Троеточие с всплывающим меню
         Box {
             IconButton(onClick = { expanded = true }) {
                 Icon(
                     Icons.Default.MoreVert,
                     contentDescription = "More options",
-                    tint = Color.Black // Черная иконка
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Удалить", color = Color.Black) },
+                    text = { Text("Удалить", color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                         viewModel.removeFromCart(cartItem.product.id)
                         expanded = false

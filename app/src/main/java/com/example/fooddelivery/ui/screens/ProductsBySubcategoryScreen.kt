@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fooddelivery.data.FoodData
@@ -31,16 +30,21 @@ fun ProductsBySubcategoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text("$categoryName - $subcategoryName", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "$categoryName - $subcategoryName",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         if (products.isEmpty()) {
             Text(
-                "Нет товаров в этой подкатегории",
+                text = "Нет товаров в этой подкатегории",
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         } else {
@@ -59,7 +63,7 @@ fun ProductsBySubcategoryScreen(
                     ) {
                         ProductCard(
                             product = product,
-                            subcategories = subcategories, // Передаем подкатегории
+                            subcategories = subcategories,
                             onFavoriteClick = { /* Не используется здесь */ },
                             onClick = { navController.navigate("product/${product.id}") }
                         )
