@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 android {
@@ -41,9 +42,14 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.foundation)
-    implementation ("io.coil-kt:coil-compose:2.4.0")
+    implementation (libs.coil.compose)
 
     implementation (libs.gson)
     implementation (libs.androidx.material.icons.extended)
@@ -67,6 +73,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

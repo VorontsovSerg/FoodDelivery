@@ -27,8 +27,8 @@ fun ProductDetailScreen(
     favoritesViewModel: FavoritesViewModel
 ) {
     var isFavorite by remember { mutableStateOf(product.isFavorite) }
-    var cartCount by remember { mutableStateOf(cartViewModel.cartItems.value.find { it.product.id == product.id }?.quantity ?: 0) }
-    val images = product.images.filterNotNull() // Фильтруем null изображения
+    var cartCount by remember { mutableStateOf(cartViewModel.cartItems.value.find { it.id == product.id }?.quantity ?: 0) }
+    val images = product.images.filterNotNull()
     val pagerState = rememberPagerState(pageCount = { images.size })
     val scope = rememberCoroutineScope()
 
@@ -38,7 +38,6 @@ fun ProductDetailScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        // Image Slider
         if (images.isNotEmpty()) {
             HorizontalPager(
                 state = pagerState,
@@ -63,8 +62,6 @@ fun ProductDetailScreen(
                     )
                 }
             }
-
-            // Индикаторы слайдера
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,7 +82,6 @@ fun ProductDetailScreen(
                 }
             }
         } else {
-            // Заглушка, если изображений нет
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -100,10 +96,7 @@ fun ProductDetailScreen(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Информация о товаре
         Text(
             text = product.name,
             style = MaterialTheme.typography.headlineMedium,
@@ -129,8 +122,6 @@ fun ProductDetailScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onBackground
         )
-
-        // Характеристики
         Spacer(modifier = Modifier.height(8.dp))
         product.attributes.forEach { (key, value) ->
             Text(
@@ -139,10 +130,7 @@ fun ProductDetailScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Кнопка "Добавить в избранное"
         Button(
             onClick = {
                 isFavorite = !isFavorite
@@ -157,10 +145,7 @@ fun ProductDetailScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Кнопка "Добавить в корзину"
         if (cartCount == 0) {
             Button(
                 onClick = {

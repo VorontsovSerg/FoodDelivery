@@ -10,6 +10,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import com.example.fooddelivery.MainActivity
 
+/**
+ * Менеджер темы приложения.
+ * Управляет переключением между светлой и тёмной темой в зависимости от настроек пользователя.
+ * Предоставляет функции для применения и сохранения состояния темы.
+ */
+
 object ThemeManager {
     private const val PREFS_NAME = "theme_prefs"
     private const val KEY_THEME = "is_dark_theme"
@@ -38,10 +44,10 @@ object ThemeManager {
     ) {
         val colorScheme = if (isDarkTheme) {
             darkColorScheme(
-                primary = Color(0xFFFFB300),
-                onPrimary = Color.Black,
-                primaryContainer = Color(0xFFFFB300),
-                onPrimaryContainer = Color.Black,
+                primary = Color(0xFFFFC107),
+                onPrimary = Color.White,
+                primaryContainer = Color(0xFFFFC107),
+                onPrimaryContainer = Color.White,
                 background = Color(0xFF1C1C1C),
                 onBackground = Color.White,
                 surface = Color(0xFF1C1C1C),
@@ -50,9 +56,9 @@ object ThemeManager {
         } else {
             lightColorScheme(
                 primary = Color(0xFFFFC107),
-                onPrimary = Color.Black,
+                onPrimary = Color.White,
                 primaryContainer = Color(0xFFFFC107),
-                onPrimaryContainer = Color.Black,
+                onPrimaryContainer = Color.White,
                 background = Color.White,
                 onBackground = Color.Black,
                 surface = Color.White,

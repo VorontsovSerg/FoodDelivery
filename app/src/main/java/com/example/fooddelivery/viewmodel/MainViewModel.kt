@@ -2,13 +2,13 @@ package com.example.fooddelivery.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fooddelivery.data.FoodApi
+import com.example.fooddelivery.data.ProductApi
 import com.example.fooddelivery.data.Product
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val api: FoodApi) : ViewModel() {
+class MainViewModel(private val api: ProductApi) : ViewModel() {
     private val _newProducts = MutableStateFlow<List<Product>>(emptyList())
     val newProducts: StateFlow<List<Product>> = _newProducts
 

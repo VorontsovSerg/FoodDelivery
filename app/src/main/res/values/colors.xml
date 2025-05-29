@@ -1,15 +1,15 @@
 <resources>
-    <color name="yellow_primary">#FFC107</color> <!-- Желтый для primary -->
-    <color name="yellow_on_primary">#000000</color> <!-- Черный для текста на желтом -->
-    <color name="yellow_background">#FFFFFF</color> <!-- Белый фон для светлой темы -->
-    <color name="yellow_on_background">#000000</color> <!-- Черный текст на белом -->
-    <color name="yellow_surface">#FFFFFF</color> <!-- Белый для поверхностей -->
-    <color name="yellow_on_surface">#000000</color> <!-- Черный для текста на поверхностях -->
+    <color name="yellow_primary">#FFC107</color>
+    <color name="yellow_on_primary">#000000</color>
+    <color name="yellow_background">#FFFFFF</color>
+    <color name="yellow_on_background">#000000</color>
+    <color name="yellow_surface">#FFFFFF</color>
+    <color name="yellow_on_surface">#000000</color>
 
     <!-- Темная тема -->
-    <color name="yellow_primary_dark">#FFB300</color> <!-- Темнее желтый для темной темы -->
+    <color name="yellow_primary_dark">#FFB300</color>
     <color name="yellow_on_primary_dark">#000000</color>
-    <color name="yellow_background_dark">#121212</color> <!-- Темный фон -->
+    <color name="yellow_background_dark">#121212</color>
     <color name="yellow_on_background_dark">#FFFFFF</color>
     <color name="yellow_surface_dark">#1C1C1C</color>
     <color name="yellow_on_surface_dark">#FFFFFF</color>

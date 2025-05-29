@@ -12,16 +12,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.fooddelivery.data.FoodData
+import com.example.fooddelivery.data.ProductData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
 import com.example.fooddelivery.viewmodel.MainViewModel
+
+/**
+ * Фрагмент главного экрана.
+ * Основной экран который показывается при старте.
+ */
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel, navController: NavController, favoritesViewModel: FavoritesViewModel) {
     val newProducts = viewModel.newProducts.collectAsState().value
     val recommendedProducts = viewModel.recommendedProducts.collectAsState().value
-    val subcategories = FoodData.categories.flatMap { it.subcategories } // Собираем все подкатегории
+    val subcategories = ProductData.categories.flatMap { it.subcategories } // Собираем все подкатегории
 
     Column(
         modifier = Modifier

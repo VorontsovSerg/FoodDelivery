@@ -21,6 +21,11 @@ import coil.compose.AsyncImage
 import com.example.fooddelivery.data.Product
 import com.example.fooddelivery.data.Subcategory
 
+/**
+ * Компонент карты товара.
+ * Карта которая привязана будет к определенному товару и будет настроена.
+ */
+
 @Composable
 fun ProductCard(
     product: Product,

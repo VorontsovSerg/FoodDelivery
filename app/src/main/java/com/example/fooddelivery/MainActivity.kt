@@ -1,8 +1,9 @@
 package com.example.fooddelivery
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,22 +11,23 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.fooddelivery.data.FoodApiImpl
-import com.example.fooddelivery.data.Product
+import com.example.fooddelivery.data.ProductApiImpl
 import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
 import com.example.fooddelivery.ui.components.SearchResults
 import com.example.fooddelivery.ui.screens.*
 import com.example.fooddelivery.utils.ThemeManager
 import com.example.fooddelivery.viewmodel.*
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -36,9 +38,38 @@ class MainActivity : ComponentActivity() {
             val isDarkTheme = remember { mutableStateOf(ThemeManager.isDarkTheme(context)) }
 
             ThemeManager.FoodDeliveryTheme(isDarkTheme = isDarkTheme.value) {
-                FoodDeliveryApp()
+                AuthCheckScreen()
             }
         }
+    }
+}
+
+@Composable
+fun AuthCheckScreen() {
+    val auth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
+    var isCheckingAuth by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        if (auth.currentUser == null) {
+            context.startActivity(Intent(context, AuthActivity::class.java))
+            (context as MainActivity).finish()
+        } else {
+            isCheckingAuth = false
+        }
+    }
+
+    if (isCheckingAuth) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+    } else {
+        FoodDeliveryApp()
     }
 }
 
@@ -52,7 +83,7 @@ fun FoodDeliveryApp() {
     var isSearchFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    val api = FoodApiImpl(context)
+    val api = ProductApiImpl(context)
     val mainViewModel = MainViewModel(api)
     val catalogViewModel = CatalogViewModel(api)
     val favoritesViewModel = FavoritesViewModel(context)
@@ -102,6 +133,7 @@ fun FoodDeliveryApp() {
                     composable("catalog") { CatalogScreen(catalogViewModel, navController) }
                     composable("favorites") { FavoritesScreen(favoritesViewModel, navController) }
                     composable("cart") { CartScreen(cartViewModel) }
+                    composable("profile") { ProfileScreen(navController) }
                     composable("search") {
                         SearchResults(
                             query = currentQuery,
@@ -168,5 +200,14 @@ fun FoodDeliveryApp() {
     BackHandler(enabled = isSearchFocused) {
         isSearchFocused = false
         focusManager.clearFocus()
+    }
+}
+
+@Composable
+fun ProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        context.startActivity(Intent(context, ProfileActivity::class.java))
+        (context as ComponentActivity).finish()
     }
 }
