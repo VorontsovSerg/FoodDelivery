@@ -1,10 +1,5 @@
 package com.example.fooddelivery.data
 
-/**
- * Интерфейс API для работы с товарами.
- * Определяет функции загрузки, обновления и получения списка товаров.
- */
-
 interface ProductApi {
     suspend fun getNewProducts(): List<Product>
     suspend fun getRecommendedProducts(): List<Product>

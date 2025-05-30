@@ -29,21 +29,21 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fooddelivery.auth.AuthRepository
 import com.example.fooddelivery.data.Category
 import com.example.fooddelivery.data.Order
 import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.data.Product
 import com.example.fooddelivery.data.ProductData
 import com.example.fooddelivery.data.Subcategory
+import com.example.fooddelivery.network.ApiClient
 import com.example.fooddelivery.ui.screens.ProductDetailScreen
 import com.example.fooddelivery.utils.ThemeManager
 import com.example.fooddelivery.viewmodel.CartViewModel
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import kotlin.random.Random
 
@@ -57,13 +57,6 @@ data class SellerData(
 class SellerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Включение оффлайн-поддержки Firestore
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(true)
-            .build()
-
         setContent {
             val context = LocalContext.current
             val isDarkTheme = remember { mutableStateOf(ThemeManager.isDarkTheme(context)) }
@@ -79,18 +72,16 @@ class SellerActivity : ComponentActivity() {
 @Composable
 fun SellerNavigation(userEmail: String) {
     val navController = rememberNavController()
-    val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     var isAuthenticated by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val user = auth.currentUser
-        if (user != null) {
+        val profile = Persistence.loadProfile(context)
+        if (profile != null) {
             try {
-                val firestore = FirebaseFirestore.getInstance()
-                val doc = firestore.collection("sellers").document(user.uid).get().await()
-                isAuthenticated = doc.exists()
+                val seller = ApiClient.sellerApi.getSeller(profile.userId)
+                isAuthenticated = seller != null
             } catch (e: Exception) {
                 Log.e("SellerNavigation", "Ошибка проверки статуса продавца: ${e.message}")
                 Toast.makeText(context, "Ошибка проверки статуса продавца", Toast.LENGTH_SHORT).show()
@@ -127,7 +118,6 @@ fun SellerNavigation(userEmail: String) {
                 if (productId != null) {
                     val product = ProductData.products.find { it.id == productId }
                     if (product != null) {
-                        // Предполагаем, что CartViewModel и FavoritesViewModel существуют
                         val cartViewModel: CartViewModel = viewModel()
                         val favoritesViewModel: FavoritesViewModel = viewModel()
                         ProductDetailScreen(
@@ -164,8 +154,7 @@ fun SellerAuthScreen(userEmail: String, onAuthenticated: () -> Unit) {
     var password by remember { mutableStateOf("") }
     var firmName by remember { mutableStateOf("") }
     var firmDescription by remember { mutableStateOf("") }
-    val auth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
+    val authRepository = AuthRepository()
 
     Column(
         modifier = Modifier
@@ -222,56 +211,47 @@ fun SellerAuthScreen(userEmail: String, onAuthenticated: () -> Unit) {
             onClick = {
                 if (isRegistering) {
                     if (email.isNotEmpty() && password.isNotEmpty() && firmName.isNotEmpty()) {
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnSuccessListener {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val token = authRepository.register(email, password, email)
                                 val seller = SellerData(
-                                    userId = auth.currentUser?.uid ?: UUID.randomUUID().toString(),
+                                    userId = token,
                                     email = email,
                                     firmName = firmName,
                                     description = firmDescription
                                 )
-                                firestore.collection("sellers").document(seller.userId).set(seller)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(context, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show()
-                                        onAuthenticated()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("SellerAuthScreen", "Ошибка регистрации: ${e.message}")
-                                        Toast.makeText(context, "Ошибка регистрации: ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
+                                ApiClient.sellerApi.registerSeller(seller)
+                                Toast.makeText(context, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show()
+                                val profile = Persistence.loadProfile(context)?.copy(userId = token)
+                                profile?.let { Persistence.saveProfile(context, it) }
+                                onAuthenticated()
+                            } catch (e: Exception) {
+                                Log.e("SellerAuthScreen", "Ошибка регистрации: ${e.message}")
+                                Toast.makeText(context, "Ошибка регистрации: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
-                            .addOnFailureListener { e ->
-                                Log.e("SellerAuthScreen", "Ошибка аутентификации: ${e.message}")
-                                Toast.makeText(context, "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
+                        }
                     } else {
                         Toast.makeText(context, "Заполните все поля", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     if (email.isNotEmpty() && password.isNotEmpty()) {
-                        auth.signInWithEmailAndPassword(email, password)
-                            .addOnSuccessListener {
-                                val userId = auth.currentUser?.uid ?: return@addOnSuccessListener
-                                firestore.collection("sellers").document(userId)
-                                    .get()
-                                    .addOnSuccessListener { doc ->
-                                        if (doc.exists()) {
-                                            Toast.makeText(context, "Вход выполнен успешно", Toast.LENGTH_SHORT).show()
-                                            onAuthenticated()
-                                        } else {
-                                            Toast.makeText(context, "Аккаунт не зарегистрирован как продавец", Toast.LENGTH_SHORT).show()
-                                            auth.signOut()
-                                        }
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("SellerAuthScreen", "Ошибка проверки данных: ${e.message}")
-                                        Toast.makeText(context, "Ошибка проверки: ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-                            .addOnFailureListener { e ->
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val token = authRepository.login(email, password)
+                                val seller = ApiClient.sellerApi.getSeller(token)
+                                if (seller != null) {
+                                    Toast.makeText(context, "Вход выполнен успешно", Toast.LENGTH_SHORT).show()
+                                    val profile = Persistence.loadProfile(context)?.copy(userId = token)
+                                    profile?.let { Persistence.saveProfile(context, it) }
+                                    onAuthenticated()
+                                } else {
+                                    Toast.makeText(context, "Аккаунт не зарегистрирован как продавец", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
                                 Log.e("SellerAuthScreen", "Ошибка входа: ${e.message}")
                                 Toast.makeText(context, "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
+                        }
                     } else {
                         Toast.makeText(context, "Введите email и пароль", Toast.LENGTH_SHORT).show()
                     }
@@ -338,20 +318,10 @@ fun ProductList(navController: NavController) {
     val context = LocalContext.current
     var products by remember { mutableStateOf<List<Product>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    val firestore = FirebaseFirestore.getInstance()
 
     LaunchedEffect(Unit) {
         try {
-            val snapshot = firestore.collection("products").get().await()
-            if (snapshot.isEmpty) {
-                ProductData.products.forEach { product ->
-                    firestore.collection("products").document(product.id.toString()).set(product).await()
-                }
-            }
-            products = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(Product::class.java)?.copy(id = doc.id.toIntOrNull() ?: 0)
-            }.ifEmpty { ProductData.products }
-            // Синхронизация ProductData.products с Firestore
+            products = ApiClient.sellerApi.getProducts()
             (ProductData.products as MutableList<Product>).clear()
             (ProductData.products as MutableList<Product>).addAll(products)
             Log.d("ProductList", "Loaded products: ${products.size}, IDs: ${products.map { it.id }}")
@@ -387,25 +357,24 @@ fun ProductList(navController: NavController) {
                     onView = { navController.navigate("productDetail/${product.id}") },
                     onEdit = { navController.navigate("editProduct/${product.id}") },
                     onDelete = {
-                        // Оптимистическое удаление
                         val oldProducts = products
                         products = products.filter { it.id != product.id }
                         (ProductData.products as MutableList<Product>).removeAll { p: Product -> p.id == product.id }
                         Log.d("ProductList", "Optimistic delete: product ID ${product.id}")
 
-                        firestore.collection("products").document(product.id.toString()).delete()
-                            .addOnSuccessListener {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                ApiClient.sellerApi.deleteProduct(product.id.toString())
                                 Toast.makeText(context, "Товар удалён", Toast.LENGTH_SHORT).show()
-                                Log.d("ProductList", "Product deleted from Firestore: ID ${product.id}")
-                            }
-                            .addOnFailureListener { e ->
-                                // Откат при ошибке
+                                Log.d("ProductList", "Product deleted: ID ${product.id}")
+                            } catch (e: Exception) {
                                 products = oldProducts
                                 (ProductData.products as MutableList<Product>).clear()
                                 (ProductData.products as MutableList<Product>).addAll(oldProducts)
                                 Log.e("ProductList", "Ошибка удаления товара: ${e.message}")
                                 Toast.makeText(context, "Ошибка удаления: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
+                        }
                     }
                 )
             }
@@ -483,7 +452,6 @@ fun AddProductScreen(navController: NavController) {
     var attributes by remember { mutableStateOf("") }
     var isFavorite by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    val firestore = FirebaseFirestore.getInstance()
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -585,29 +553,20 @@ fun AddProductScreen(navController: NavController) {
                         coroutineScope.launch {
                             var newId: Int? = null
                             try {
-                                // Фильтрация пустых и некорректных URL
                                 val imageList = imageUrls
                                     .split(",", "\n")
                                     .map { it.trim() }
                                     .filter { it.isNotEmpty() && it.startsWith("http") }
-                                    .map { it } // List<String> без null
+                                    .map { it }
 
                                 val attributeMap = attributes.split(",")
                                     .map { it.trim().split(":") }
                                     .filter { it.size == 2 && it[0].isNotBlank() && it[1].isNotBlank() }
                                     .associate { it[0].trim() to it[1].trim() }
 
-                                // Генерация уникального ID
                                 do {
                                     newId = Random.nextInt(1000, 9999)
-                                    val docRef = firestore.collection("products").document(newId.toString())
-                                    val doc = try {
-                                        docRef.get().await()
-                                    } catch (e: Exception) {
-                                        Log.w("AddProductScreen", "Ошибка проверки ID (возможно оффлайн): ${e.message}")
-                                        null // Продолжаем, если оффлайн
-                                    }
-                                } while (newId?.let { ProductData.products.any { p -> p.id == it } } == true || doc?.exists() == true)
+                                } while (newId?.let { ProductData.products.any { p -> p.id == it } } == true)
 
                                 val product = Product(
                                     id = newId!!,
@@ -623,7 +582,6 @@ fun AddProductScreen(navController: NavController) {
 
                                 Log.d("AddProductScreen", "Creating product: ID=$newId, Name=${product.name}, Images=${product.images}")
 
-                                // Обновление категорий
                                 val existingCategory = ProductData.categories.find { it.name == category }
                                 if (existingCategory == null) {
                                     (ProductData.categories as MutableList<Category>).add(
@@ -639,24 +597,15 @@ fun AddProductScreen(navController: NavController) {
                                     )
                                 }
 
-                                // Добавление в локальный список
                                 (ProductData.products as MutableList<Product>).add(product)
                                 Log.d("AddProductScreen", "Product added to ProductData: ${ProductData.products.map { it.id }}")
 
-                                // Сохранение в Firestore (оффлайн-поддержка)
-                                firestore.collection("products").document(product.id.toString()).set(product)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(context, "Товар добавлен", Toast.LENGTH_SHORT).show()
-                                        Log.d("AddProductScreen", "Product saved to Firestore: ID=${product.id}")
-                                        navController.popBackStack()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("AddProductScreen", "Ошибка синхронизации с Firestore: ${e.message}")
-                                        Toast.makeText(context, "Товар сохранён локально, синхронизация при подключении", Toast.LENGTH_LONG).show()
-                                    }
+                                ApiClient.sellerApi.addProduct(product)
+                                Toast.makeText(context, "Товар добавлен", Toast.LENGTH_SHORT).show()
+                                Log.d("AddProductScreen", "Product saved: ID=${product.id}")
+                                navController.popBackStack()
 
                             } catch (e: Exception) {
-                                // Откат при критической ошибке
                                 newId?.let { id ->
                                     (ProductData.products as MutableList<Product>).removeAll { p: Product -> p.id == id }
                                 }
@@ -691,11 +640,9 @@ fun EditProductScreen(navController: NavController, productId: Int) {
     var attributes by remember { mutableStateOf("") }
     var isFavorite by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    val firestore = FirebaseFirestore.getInstance()
 
     LaunchedEffect(productId) {
         try {
-            // Попробуем найти товар в ProductData.products
             val localProduct = ProductData.products.find { it.id == productId }
             if (localProduct != null) {
                 product = localProduct
@@ -709,25 +656,8 @@ fun EditProductScreen(navController: NavController, productId: Int) {
                 isFavorite = localProduct.isFavorite
                 Log.d("EditProductScreen", "Loaded product from ProductData: ID=$productId, Name=${localProduct.name}")
             } else {
-                // Если нет локально, пробуем Firestore
-                val doc = firestore.collection("products").document(productId.toString()).get().await()
-                product = doc.toObject(Product::class.java)?.copy(id = productId)
-                product?.let {
-                    name = it.name
-                    price = it.price.toString()
-                    imageUrls = it.images.filterNotNull().joinToString(", ")
-                    category = it.category
-                    subcategory = it.subcategory
-                    description = it.description
-                    attributes = it.attributes.entries.joinToString(", ") { "${it.key}:${it.value}" }
-                    isFavorite = it.isFavorite
-                    // Добавляем в ProductData.products для синхронизации
-                    (ProductData.products as MutableList<Product>).add(it)
-                    Log.d("EditProductScreen", "Loaded product from Firestore: ID=$productId, Name=${it.name}")
-                } ?: run {
-                    errorMessage = "Товар не найден"
-                    Log.e("EditProductScreen", "Product not found: ID=$productId")
-                }
+                errorMessage = "Товар не найден"
+                Log.e("EditProductScreen", "Product not found: ID=$productId")
             }
         } catch (e: Exception) {
             Log.e("EditProductScreen", "Ошибка загрузки товара: ${e.message}")
@@ -881,16 +811,17 @@ fun EditProductScreen(navController: NavController, productId: Int) {
                         (ProductData.products as MutableList<Product>).add(updatedProduct)
                         Log.d("EditProductScreen", "Product updated in ProductData: ${ProductData.products.map { it.id }}")
 
-                        firestore.collection("products").document(productId.toString()).set(updatedProduct)
-                            .addOnSuccessListener {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                ApiClient.sellerApi.updateProduct(productId.toString(), updatedProduct)
                                 Toast.makeText(context, "Товар обновлён", Toast.LENGTH_SHORT).show()
-                                Log.d("EditProductScreen", "Product updated in Firestore: ID=$productId")
+                                Log.d("EditProductScreen", "Product updated: ID=$productId")
                                 navController.popBackStack()
-                            }
-                            .addOnFailureListener { e ->
+                            } catch (e: Exception) {
                                 Log.e("EditProductScreen", "Ошибка обновления товара: ${e.message}")
-                                Toast.makeText(context, "Товар обновлён локально, синхронизация при подключении", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Ошибка обновления: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
+                        }
                     } else {
                         Toast.makeText(context, "Заполните все обязательные поля", Toast.LENGTH_SHORT).show()
                     }

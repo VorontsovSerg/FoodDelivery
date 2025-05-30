@@ -17,11 +17,6 @@ import com.example.fooddelivery.data.ProductData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.CatalogViewModel
 
-/**
- * Фрагмент с товарами подкатегории.
- * Показывает товары определенной подкатегории.
- */
-
 @Composable
 fun ProductsBySubcategoryScreen(
     viewModel: CatalogViewModel,

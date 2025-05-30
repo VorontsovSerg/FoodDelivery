@@ -2,10 +2,6 @@ package com.example.fooddelivery.data
 
 import android.content.Context
 
-/**
- * Реализация интерфейса ProductApi.
- * Отвечает за получение данных о товарах (локально или через сеть).
- */
 
 class ProductApiImpl(private val context: Context) : ProductApi {
     override suspend fun getNewProducts(): List<Product> {

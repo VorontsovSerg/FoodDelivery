@@ -20,10 +20,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fooddelivery.auth.AuthRepository
 import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.data.ProfileData
 import com.example.fooddelivery.utils.ThemeManager
-import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 class AuthActivity : ComponentActivity() {
@@ -44,7 +47,7 @@ class AuthActivity : ComponentActivity() {
 fun AuthScreen() {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
+    val authRepository = AuthRepository()
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
@@ -91,7 +94,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
+    val authRepository = AuthRepository()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -151,25 +154,25 @@ fun LoginScreen(
                     return@Button
                 }
                 isLoading = true
-                auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        val token = authRepository.login(email, password)
+                        val profile = ProfileData(
+                            userId = token, // Используем токен как ID
+                            userName = "Гость",
+                            email = email,
+                            phone = null,
+                            avatarUri = null,
+                            isEmailVerified = false
+                        )
+                        Persistence.saveProfile(context, profile)
+                        onLoginSuccess()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Ошибка входа: ${e.message}", Toast.LENGTH_LONG).show()
+                    } finally {
                         isLoading = false
-                        if (task.isSuccessful) {
-                            val user = auth.currentUser
-                            val profile = ProfileData(
-                                userId = user?.uid ?: "",
-                                userName = user?.displayName ?: "Гость",
-                                email = user?.email ?: "example@email.com",
-                                phone = null,
-                                avatarUri = user?.photoUrl?.toString(),
-                                isEmailVerified = user?.isEmailVerified ?: false
-                            )
-                            Persistence.saveProfile(context, profile)
-                            onLoginSuccess()
-                        } else {
-                            Toast.makeText(context, "Ошибка входа: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                        }
                     }
+                }
             },
             enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
@@ -194,7 +197,7 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
+    val authRepository = AuthRepository()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
@@ -263,30 +266,26 @@ fun RegisterScreen(
                     return@Button
                 }
                 isLoading = true
-                auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        val token = authRepository.register(email, password, email)
+                        val profile = ProfileData(
+                            userId = token,
+                            userName = userName,
+                            email = email,
+                            phone = null,
+                            avatarUri = null,
+                            isEmailVerified = false
+                        )
+                        Persistence.saveProfile(context, profile)
+                        Toast.makeText(context, "Регистрация успешна", Toast.LENGTH_LONG).show()
+                        onRegisterSuccess()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Ошибка регистрации: ${e.message}", Toast.LENGTH_LONG).show()
+                    } finally {
                         isLoading = false
-                        if (task.isSuccessful) {
-                            val user = auth.currentUser
-                            user?.updateProfile(com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                .setDisplayName(userName)
-                                .build())
-                            user?.sendEmailVerification()
-                            val profile = ProfileData(
-                                userId = user?.uid ?: "",
-                                userName = userName,
-                                email = email,
-                                phone = null,
-                                avatarUri = null,
-                                isEmailVerified = false
-                            )
-                            Persistence.saveProfile(context, profile)
-                            Toast.makeText(context, "Подтвердите email через письмо", Toast.LENGTH_LONG).show()
-                            onRegisterSuccess()
-                        } else {
-                            Toast.makeText(context, "Ошибка регистрации: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                        }
                     }
+                }
             },
             enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
@@ -311,11 +310,8 @@ fun ResetPasswordScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
     var emailOrPhone by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-
-    // Регулярное выражение для проверки номера телефона
     val phonePattern = Pattern.compile("^((\\+7|8)[0-9]{10})\$")
 
     Column(
@@ -366,16 +362,9 @@ fun ResetPasswordScreen(
                         return@Button
                     }
                     isLoading = true
-                    auth.sendPasswordResetEmail(emailOrPhone)
-                        .addOnCompleteListener { task ->
-                            isLoading = false
-                            if (task.isSuccessful) {
-                                Toast.makeText(context, "Письмо для сброса пароля отправлено", Toast.LENGTH_LONG).show()
-                                onResetSuccess()
-                            } else {
-                                Toast.makeText(context, "Ошибка: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                    Toast.makeText(context, "Функция сброса пароля не реализована", Toast.LENGTH_LONG).show()
+                    isLoading = false
+                    onResetSuccess()
                 },
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
@@ -396,7 +385,6 @@ fun NewPasswordScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -469,16 +457,9 @@ fun NewPasswordScreen(
                         return@Button
                     }
                     isLoading = true
-                    auth.currentUser?.updatePassword(newPassword)
-                        ?.addOnCompleteListener { task ->
-                            isLoading = false
-                            if (task.isSuccessful) {
-                                Toast.makeText(context, "Пароль успешно обновлен", Toast.LENGTH_LONG).show()
-                                onPasswordResetSuccess()
-                            } else {
-                                Toast.makeText(context, "Ошибка: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                    Toast.makeText(context, "Функция обновления пароля не реализована", Toast.LENGTH_LONG).show()
+                    isLoading = false
+                    onPasswordResetSuccess()
                 },
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(

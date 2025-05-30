@@ -46,7 +46,6 @@ import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.data.ProfileData
 import com.example.fooddelivery.ui.screens.EditProfileScreen
 import com.example.fooddelivery.utils.ThemeManager
-import com.google.firebase.auth.FirebaseAuth
 import java.util.UUID
 import kotlin.random.Random
 
@@ -94,7 +93,6 @@ fun ProfileScreen(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
     val initialProfile = remember {
         Persistence.loadProfile(context) ?: ProfileData(
             userId = UUID.randomUUID().toString(),
@@ -124,15 +122,10 @@ fun ProfileScreen(
                 ) {
                     Button(
                         onClick = {
-                            val user = auth.currentUser
-                            if (user == null) {
-                                context.startActivity(Intent(context, AuthActivity::class.java))
-                            } else {
-                                val intent = Intent(context, SellerActivity::class.java).apply {
-                                    putExtra("userEmail", user.email)
-                                }
-                                context.startActivity(intent)
+                            val intent = Intent(context, SellerActivity::class.java).apply {
+                                putExtra("userEmail", profile.email)
                             }
+                            context.startActivity(intent)
                         },
                         modifier = Modifier
                             .height(48.dp)
@@ -150,8 +143,8 @@ fun ProfileScreen(
                                 .background(
                                     brush = Brush.linearGradient(
                                         colors = listOf(
-                                            Color(0xFF2196F3), // Синий
-                                            Color(0xFF21CBF3)  // Голубой
+                                            Color(0xFF2196F3),
+                                            Color(0xFF21CBF3)
                                         ),
                                         start = androidx.compose.ui.geometry.Offset(0f, 0f),
                                         end = androidx.compose.ui.geometry.Offset(100f, 100f)
@@ -234,9 +227,6 @@ fun ProfileScreen(
                             append("Email: ")
                             pushStyle(SpanStyle(fontStyle = FontStyle.Italic))
                             append(profile.email)
-                            append(" (")
-                            append(if (profile.isEmailVerified) "подтвержден" else "не подтвержден")
-                            append(")")
                             pop()
                         },
                         style = TextStyle(fontSize = textSize, color = MaterialTheme.colorScheme.onSurface)
@@ -282,7 +272,6 @@ fun ProfileScreen(
 
                 Button(
                     onClick = {
-                        auth.signOut()
                         Persistence.clearProfile(context)
                         context.startActivity(Intent(context, AuthActivity::class.java))
                         (context as ProfileActivity).finish()
@@ -305,7 +294,7 @@ fun ProfileScreen(
                 initialProfile = profile,
                 onProfileUpdated = { updatedProfile ->
                     profile = updatedProfile
-                    Persistence.saveProfile(context, updatedProfile) // Сохраняем профиль
+                    Persistence.saveProfile(context, updatedProfile)
                     Log.d("ProfileScreen", "Profile updated: avatarUri = ${updatedProfile.avatarUri}")
                 }
             )

@@ -22,11 +22,6 @@ import androidx.navigation.NavController
 import com.example.fooddelivery.data.Category
 import com.example.fooddelivery.viewmodel.CatalogViewModel
 
-/**
- * Фрагмент каталога товаров.
- * Отвечает за отображение списка всех товаров и обработку событий выбора товара.
- */
-
 @Composable
 fun CatalogScreen(viewModel: CatalogViewModel, navController: NavController) {
     val categories by viewModel.categories.collectAsState()

@@ -17,11 +17,6 @@ import com.example.fooddelivery.data.ProductData
 import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
 
-/**
- * Фрагмент избранного.
- * Показывает товары которые были добавлены в избранное.
- */
-
 @Composable
 fun FavoritesScreen(viewModel: FavoritesViewModel, navController: NavController) {
     val favorites = viewModel.favorites.collectAsState().value

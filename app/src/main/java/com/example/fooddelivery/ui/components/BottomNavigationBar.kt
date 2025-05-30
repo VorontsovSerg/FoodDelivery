@@ -18,12 +18,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.fooddelivery.ProfileActivity
 
-/**
- * Компонент нижней панели.
- * На нем расположены 5 кнопок для переключения между фрагментами или активностями:
- * главный экран, категории, избранное, корзина, профиль.
- */
-
 @Composable
 fun BottomNavigationBar(navController: NavController, onNavigate: (String) -> Unit = {}) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()

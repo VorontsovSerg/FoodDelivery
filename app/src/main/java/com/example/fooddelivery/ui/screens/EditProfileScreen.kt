@@ -26,8 +26,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.data.ProfileData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
 import java.util.regex.Pattern
 
 @Composable
@@ -37,7 +35,6 @@ fun EditProfileScreen(
     onProfileUpdated: (ProfileData) -> Unit
 ) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
     val editNavController = rememberNavController()
     var userName by remember { mutableStateOf(initialProfile.userName) }
     var email by remember { mutableStateOf(initialProfile.email) }
@@ -45,15 +42,7 @@ fun EditProfileScreen(
     var avatarUri by remember { mutableStateOf(initialProfile.avatarUri) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Регулярное выражение для проверки номера телефона
     val phonePattern = Pattern.compile("^((\\+7|8)[0-9]{10})\$")
-
-    // Сбрасываем email, если он был изменен, но не подтвержден
-    LaunchedEffect(initialProfile.email) {
-        if (!initialProfile.isEmailVerified && email != initialProfile.email) {
-            email = initialProfile.email
-        }
-    }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         avatarUri = uri?.toString()
@@ -173,40 +162,17 @@ fun EditProfileScreen(
                                 return@Button
                             }
 
-                            val needsEmailVerification = email != initialProfile.email || !initialProfile.isEmailVerified
-
-                            if (needsEmailVerification) {
-                                isLoading = true
-                                auth.currentUser?.updateEmail(email)?.addOnCompleteListener { task ->
-                                    isLoading = false
-                                    if (task.isSuccessful) {
-                                        auth.currentUser?.sendEmailVerification()?.addOnCompleteListener {
-                                            Toast.makeText(context, "Письмо для подтверждения email отправлено", Toast.LENGTH_LONG).show()
-                                            editNavController.navigate("email_verification")
-                                        }
-                                    } else {
-                                        Toast.makeText(context, "Ошибка обновления email: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                            } else {
-                                val updatedProfile = ProfileData(
-                                    userId = initialProfile.userId,
-                                    userName = userName,
-                                    email = email,
-                                    phone = normalizedPhone.ifEmpty { null },
-                                    avatarUri = avatarUri,
-                                    isEmailVerified = initialProfile.isEmailVerified
-                                )
-                                auth.currentUser?.updateProfile(
-                                    UserProfileChangeRequest.Builder()
-                                        .setDisplayName(userName)
-                                        .setPhotoUri(avatarUri?.let { Uri.parse(it) })
-                                        .build()
-                                )
-                                Persistence.saveProfile(context, updatedProfile)
-                                onProfileUpdated(updatedProfile)
-                                navController.popBackStack()
-                            }
+                            val updatedProfile = ProfileData(
+                                userId = initialProfile.userId,
+                                userName = userName,
+                                email = email,
+                                phone = normalizedPhone.ifEmpty { null },
+                                avatarUri = avatarUri,
+                                isEmailVerified = initialProfile.isEmailVerified
+                            )
+                            Persistence.saveProfile(context, updatedProfile)
+                            onProfileUpdated(updatedProfile)
+                            navController.popBackStack()
                         },
                         enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(
@@ -217,99 +183,6 @@ fun EditProfileScreen(
                         Text("Сохранить")
                     }
                 }
-            }
-        }
-        composable("email_verification") {
-            EmailVerificationScreen(
-                navController = editNavController,
-                onVerificationSuccess = {
-                    val updatedProfile = ProfileData(
-                        userId = initialProfile.userId,
-                        userName = userName,
-                        email = email,
-                        phone = phone.ifEmpty { null },
-                        avatarUri = avatarUri,
-                        isEmailVerified = true
-                    )
-                    auth.currentUser?.updateProfile(
-                        UserProfileChangeRequest.Builder()
-                            .setDisplayName(userName)
-                            .setPhotoUri(avatarUri?.let { Uri.parse(it) })
-                            .build()
-                    )
-                    Persistence.saveProfile(context, updatedProfile)
-                    onProfileUpdated(updatedProfile)
-                    navController.popBackStack()
-                },
-                onBack = { editNavController.popBackStack() }
-            )
-        }
-    }
-}
-
-@Composable
-fun EmailVerificationScreen(
-    navController: NavController,
-    onVerificationSuccess: () -> Unit,
-    onBack: () -> Unit
-) {
-    val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
-    var isLoading by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Подтверждение Email",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Проверьте ваш email и перейдите по ссылке для подтверждения",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(
-                onClick = onBack,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text("Назад")
-            }
-            Button(
-                onClick = {
-                    isLoading = true
-                    auth.currentUser?.reload()?.addOnCompleteListener { task ->
-                        isLoading = false
-                        if (task.isSuccessful && auth.currentUser?.isEmailVerified == true) {
-                            onVerificationSuccess()
-                        } else {
-                            Toast.makeText(context, "Email еще не подтвержден", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                },
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text("Подтвердить")
             }
         }
     }

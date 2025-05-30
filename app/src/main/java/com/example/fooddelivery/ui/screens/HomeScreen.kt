@@ -17,11 +17,6 @@ import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.FavoritesViewModel
 import com.example.fooddelivery.viewmodel.MainViewModel
 
-/**
- * Фрагмент главного экрана.
- * Основной экран который показывается при старте.
- */
-
 @Composable
 fun HomeScreen(viewModel: MainViewModel, navController: NavController, favoritesViewModel: FavoritesViewModel) {
     val newProducts = viewModel.newProducts.collectAsState().value

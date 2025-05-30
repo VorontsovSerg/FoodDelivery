@@ -1,4 +1,8 @@
 package com.example.server
 
-class UserDTO {
-}
+data class UserDTO(
+    val login: String,
+    val password: String,
+    val email: String?,
+    val username: String = ""
+)

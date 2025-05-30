@@ -14,11 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.fooddelivery.data.Category
 
-/**
- * Компонент карты категории.
- * Карта которая привязана будет к определенной категории и будет настроена.
- */
-
 @Composable
 fun CategoryCard(
     category: Category,

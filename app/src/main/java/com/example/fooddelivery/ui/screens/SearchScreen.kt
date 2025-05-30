@@ -16,11 +16,6 @@ import com.example.fooddelivery.ui.components.ProductCard
 import com.example.fooddelivery.viewmodel.SearchViewModel
 import kotlinx.coroutines.launch
 
-/**
- * Фрагмент результатов поиска.
- * Показывает результаты поиска по запросу.
- */
-
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, query: String, navController: NavController) {
     val searchResults = viewModel.searchResults.collectAsState().value

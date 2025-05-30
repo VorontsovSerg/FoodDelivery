@@ -23,11 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fooddelivery.data.Persistence
 
-/**
- * Компонент верхней панели.
- * Здесь поле ввода для поиска товаров.
- */
-
 @Composable
 fun SearchBar(
     searchQuery: String,

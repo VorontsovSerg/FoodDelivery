@@ -26,11 +26,6 @@ import com.example.fooddelivery.viewmodel.SearchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * Компонент результатов поиска по запросу.
- * Покажет число выведенных товаров по запросу и их список.
- */
-
 @Composable
 fun SearchResults(
     query: String,

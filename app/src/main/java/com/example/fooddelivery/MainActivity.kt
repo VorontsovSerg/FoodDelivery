@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fooddelivery.data.Persistence
 import com.example.fooddelivery.data.ProductApiImpl
 import com.example.fooddelivery.ui.components.BottomNavigationBar
 import com.example.fooddelivery.ui.components.SearchBar
@@ -27,7 +28,6 @@ import com.example.fooddelivery.ui.components.SearchResults
 import com.example.fooddelivery.ui.screens.*
 import com.example.fooddelivery.utils.ThemeManager
 import com.example.fooddelivery.viewmodel.*
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -46,12 +46,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthCheckScreen() {
-    val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     var isCheckingAuth by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        if (auth.currentUser == null) {
+        if (Persistence.loadProfile(context) == null) {
             context.startActivity(Intent(context, AuthActivity::class.java))
             (context as MainActivity).finish()
         } else {

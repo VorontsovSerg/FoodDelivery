@@ -1,9 +1,5 @@
 package com.example.fooddelivery.data
 
-/**
- * Вспомогательный класс или объект для управления товарами.
- * Может использоваться для хранения временных данных или моков.
- */
 object ProductData {
     val products: MutableList<Product> = mutableListOf(
         // Категория: Базар
