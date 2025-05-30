@@ -306,7 +306,7 @@ fun SbpPaymentScreen(totalPrice: Double, cartItems: List<CartItem>) {
                 orders.add(order)
                 Persistence.saveOrders(context, orders)
                 CartViewModel(context).clearCart()
-                Persistence.saveCart(context, emptyList()) // Явная очистка корзины
+                Persistence.saveCart(context, emptyList())
                 showNotification(
                     context,
                     "Заказ создан",
@@ -482,5 +482,4 @@ private fun showNotification(context: Context, title: String, content: String, n
         .setAutoCancel(true)
 
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.notify(notificationId, builder.build())
 }
